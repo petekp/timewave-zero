@@ -40,8 +40,10 @@ date, number set and the stretch of time being looked at.
 - "Descend" glides the view into the zero point at a fixed rate on the log scale, 64 times
   closer every few seconds. Because the wave repeats at every 64×, the same terrain keeps rising
   under the camera until an hour is left. Any drag or scroll stops it.
-- The zero point is a beam of light. It defaults to 6 AM on December 21, 2012; a slider moves
-  it anywhere from 1900 to 2200 and the whole curve re-fits. Three presets carry their reasons:
+- The zero point is a beam of light. It defaults to 6 AM on December 21, 2012. The end-date
+  slider moves it anywhere from 1900 to 2200: the view widens until the beam is in sight, the
+  vertical scale holds while the slider is held so the curve visibly slides along history, and
+  a tip shows the shift and how many events in view sit in dips. Three presets carry their reasons:
   McKenna's final date, the Hiroshima-aligned Nov 18, 2012 he started with, and the Sept 28,
   1995 that Meyer's Caesar/Kennedy pairing implies. Past the zero point the theory ends; the
   ribbon continues as a grey reflection of the years before, and the readout says so.

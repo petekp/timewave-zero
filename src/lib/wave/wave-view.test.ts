@@ -6,6 +6,8 @@ import { ticksFor } from "./ticks";
 import { formatDuration, formatYear, momentToDay } from "./time";
 import { dateDay, decodeWaveState, encodeWaveState } from "./url";
 import { cycles } from "./cycles";
+import { dipCount, followZero, viewWithZero } from "./fit";
+import { EVENTS } from "./events";
 
 const ZERO_DAY = momentToDay(DEFAULT_ZERO_MOMENT);
 
@@ -39,6 +41,12 @@ describe("ticks", () => {
 });
 
 describe("formatting", () => {
+  test("durations keep their trailing zeros", () => {
+    expect(formatDuration(40000)).toBe("110 years");
+    expect(formatDuration(100)).toBe("100 days");
+    expect(formatDuration(3.6 * 365.25)).toBe("3.6 years");
+  });
+
   test("years read as people write them", () => {
     expect(formatYear(1999)).toBe("1999");
     expect(formatYear(12000)).toBe("12,000");
@@ -102,5 +110,33 @@ describe("zero presets", () => {
     const { ZERO_PRESETS } = await import("./presets");
     const h = ZERO_PRESETS.find((p) => p.id === "hiroshima")!;
     expect(h.zero).toMatchObject({ year: 2012, month: 11, day: 18, hour: 8, minute: 15 });
+  });
+});
+
+describe("fitting the end date", () => {
+  const zero = momentToDay(DEFAULT_ZERO_MOMENT);
+  const view = { center: dateDay(1945, 8, 6), span: 40000 };
+
+  test("the view widens until the zero point is inside it", () => {
+    const v = viewWithZero(view, zero);
+    expect(Math.abs(zero - v.center)).toBeLessThanOrEqual(0.42 * v.span);
+    expect(Math.abs(view.center - v.center)).toBeLessThanOrEqual(0.42 * v.span);
+    expect(viewWithZero({ center: zero - 100, span: 3000 }, zero)).toEqual({ center: zero - 100, span: 3000 });
+  });
+
+  test("following pans by the least amount", () => {
+    const v = followZero({ center: zero - 3000, span: 3000 }, zero);
+    expect(zero - v.center).toBeCloseTo(0.42 * 3000, 6);
+    expect(v.span).toBe(3000);
+  });
+
+  test("dip count only looks at events in view and before the zero point", () => {
+    const wave = waveFor("DATA.TWZ");
+    const tiers = { mckenna: true, added: true, projected: false };
+    const { inDip, total } = dipCount(wave, EVENTS, tiers, zero, view);
+    expect(total).toBeGreaterThan(10);
+    expect(inDip).toBeGreaterThan(0);
+    expect(inDip).toBeLessThan(total);
+    expect(dipCount(wave, EVENTS, tiers, view.center - view.span, view).total).toBe(0);
   });
 });

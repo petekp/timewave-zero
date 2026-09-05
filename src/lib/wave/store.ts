@@ -8,7 +8,10 @@ import { DEFAULT_ZERO_MOMENT, type Moment } from "../timewave/calendar";
 import type { NumberSetName } from "../timewave/datasets";
 import type { EventTier } from "./events";
 import { BASE_CYCLE_DAYS } from "./cycles";
+import { followZero, viewWithZero } from "./fit";
+import { sampleWindow } from "./sample";
 import { dateToDay, momentToDay } from "./time";
+import { waveFor } from "./waves";
 
 export const MIN_SPAN = 1 / 24;
 export const MAX_SPAN = BASE_CYCLE_DAYS * Math.pow(64, 6) * 1.5;
@@ -43,6 +46,8 @@ export interface WaveState {
   descending: boolean;
   /** Set after the first drag or wheel, to retire the hint. */
   interacted: boolean;
+  /** While the end date is dragged: where it started and the vertical scale held for the drag. */
+  fitting: { fromDay: number; min: number; max: number } | null;
 
   setZero(zero: Moment): void;
   setNumberSet(name: NumberSetName): void;
@@ -66,6 +71,11 @@ export interface WaveState {
   setShowMarkEchoes(on: boolean): void;
   setDescending(on: boolean): void;
   setInteracted(): void;
+  /** Start dragging the end date: bring the zero point into view and hold the scale. */
+  beginFit(): void;
+  endFit(): void;
+  /** Ease the view out until the zero point is inside it. */
+  revealZero(): void;
   /** Refresh the present moment. */
   touchNow(): void;
 }
@@ -115,8 +125,28 @@ export function createWaveStore(initial: InitialView = {}, now: Date = new Date(
     showMarkEchoes: false,
     descending: false,
     interacted: false,
+    fitting: null,
 
-    setZero: (zero) => set({ zero, zeroDay: momentToDay(zero) }),
+    setZero: (zero) => {
+      const zeroDay = momentToDay(zero);
+      const { fitting, goalCenter, goalSpan } = get();
+      if (!fitting) return set({ zero, zeroDay });
+      const view = followZero({ center: goalCenter, span: goalSpan }, zeroDay);
+      set({ zero, zeroDay, goalCenter: view.center });
+    },
+    beginFit: () => {
+      const { zeroDay, goalCenter, goalSpan, numberSet } = get();
+      const view = viewWithZero({ center: goalCenter, span: goalSpan }, zeroDay);
+      const span = clampSpan(view.span);
+      const { min, max } = sampleWindow(waveFor(numberSet), { zeroDay, center: view.center, span, count: 2048 });
+      set({ fitting: { fromDay: zeroDay, min, max }, descending: false, goalCenter: clampCenter(view.center, zeroDay), goalSpan: span });
+    },
+    endFit: () => set({ fitting: null }),
+    revealZero: () => {
+      const { zeroDay, goalCenter, goalSpan } = get();
+      const view = viewWithZero({ center: goalCenter, span: goalSpan }, zeroDay);
+      set({ goalCenter: clampCenter(view.center, zeroDay), goalSpan: clampSpan(view.span) });
+    },
     setNumberSet: (numberSet) => set({ numberSet }),
     setView: (c, s) => {
       const span = clampSpan(s);

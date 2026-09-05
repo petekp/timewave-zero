@@ -30,7 +30,7 @@ export default function Ribbon({ surfaceRef }: { surfaceRef: SurfaceRef }) {
 
   useFrame(({ camera, clock }, dt) => {
     ribbon.tick(clock.elapsedTime, camera.position);
-    const { center, span, zeroDay, numberSet } = store.getState();
+    const { center, span, zeroDay, numberSet, fitting } = store.getState();
     const v = view.current;
     const moved = center !== v.center || span !== v.span || zeroDay !== v.zeroDay || numberSet !== v.numberSet;
     if (moved) {
@@ -41,9 +41,11 @@ export default function Ribbon({ surfaceRef }: { surfaceRef: SurfaceRef }) {
     if (!samples) return;
 
     // Ease the displayed range toward the sampled one so the terrain settles instead of jumping.
+    // While the end date is dragged the range holds, so the curve slides instead of re-fitting.
+    const target = fitting ?? samples;
     const k = viewMetrics.ready ? Math.min(1, 1 - Math.exp(-dt * 7)) : 1;
-    viewMetrics.min += (samples.min - viewMetrics.min) * k;
-    viewMetrics.max += (samples.max - viewMetrics.max) * k;
+    viewMetrics.min += (target.min - viewMetrics.min) * k;
+    viewMetrics.max += (target.max - viewMetrics.max) * k;
     viewMetrics.ready = true;
     if (!moved && drawn.current.min === viewMetrics.min && drawn.current.max === viewMetrics.max) return;
     drawn.current = { min: viewMetrics.min, max: viewMetrics.max };

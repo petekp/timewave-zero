@@ -40,7 +40,7 @@ export function formatYear(year: number): string {
 }
 
 function trimFloat(v: number): string {
-  return v.toPrecision(3).replace(/\.?0+$/, "");
+  return String(Number(v.toPrecision(3)));
 }
 
 export type DateDetail = "minute" | "hour" | "day" | "month" | "year";

@@ -5,10 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { DEFAULT_ZERO_MOMENT, fromJdn, toJdn } from "@/lib/timewave/calendar";
 import { NUMBER_SET_INFO, NUMBER_SET_NAMES, type NumberSetName } from "@/lib/timewave/datasets";
 import { cycles, ladderPosition } from "@/lib/wave/cycles";
+import { EVENTS } from "@/lib/wave/events";
+import { dipCount } from "@/lib/wave/fit";
 import { ZERO_PRESETS } from "@/lib/wave/presets";
 import { valueAt } from "@/lib/wave/sample";
 import { waveSound } from "@/lib/wave/sound";
-import { formatDayFull, formatDaysToZero, formatDuration, momentToDay } from "@/lib/wave/time";
+import { formatDay, formatDayFull, formatDaysToZero, formatDuration, momentToDay } from "@/lib/wave/time";
 import { formatMoment, parseMoment } from "@/lib/wave/url";
 import { waveFor } from "@/lib/wave/waves";
 import EventList from "./EventList";
@@ -37,7 +39,7 @@ const GUIDE = [
   },
   {
     title: "The beam is the zero point.",
-    body: "December 21, 2012, 6 AM. The wave reaches zero there and the theory stops; past it the ribbon is a grey reflection of the years before. The slider moves the zero point and the whole curve re-fits.",
+    body: "December 21, 2012, 6 AM. The wave reaches zero there and the theory stops; past it the ribbon is a grey reflection of the years before. The end-date slider moves it: the curve slides along history while the events stay where they happened.",
   },
   {
     title: "Pins, echoes, descent.",
@@ -93,6 +95,8 @@ export default function Hud() {
   const descending = useWave((s) => s.descending);
   const interacted = useWave((s) => s.interacted);
   const [copied, setCopied] = useState(false);
+  const fitting = useWave((s) => s.fitting);
+  const tiers = useWave((s) => s.tiers);
   const [menuOpen, setMenuOpen] = useState(false);
   // The zero date field is free text while editing; it re-syncs whenever the store's zero date changes.
   const [zeroEdit, setZeroEdit] = useState<{ zero: typeof zero; text: string } | null>(null);
@@ -112,11 +116,38 @@ export default function Hud() {
     const d = fromJdn(Math.round(day), "gregorian");
     store.getState().setZero({ ...d, hour: zero.hour, minute: zero.minute });
   };
+  const jumpZero = (m: typeof zero) => {
+    store.getState().setZero(m);
+    store.getState().revealZero();
+  };
   const commitZeroText = () => {
     const m = parseMoment(zeroText);
-    if (m) store.getState().setZero({ ...m, hour: zero.hour, minute: zero.minute });
+    if (m) jumpZero({ ...m, hour: zero.hour, minute: zero.minute });
     setZeroEdit(null);
   };
+  // The drag holds the scale and keeps the zero in view; it ends on release, or a moment after the last key press.
+  const fitTimer = useRef<number | null>(null);
+  const sliderHeld = useRef(false);
+  const beginFit = () => {
+    if (!store.getState().fitting) store.getState().beginFit();
+  };
+  const endFitSoon = (ms: number) => {
+    if (fitTimer.current !== null) window.clearTimeout(fitTimer.current);
+    fitTimer.current = window.setTimeout(() => {
+      fitTimer.current = null;
+      if (!sliderHeld.current) store.getState().endFit();
+    }, ms);
+  };
+  useEffect(
+    () => () => {
+      if (fitTimer.current !== null) window.clearTimeout(fitTimer.current);
+    },
+    [],
+  );
+  const fitShift = fitting ? zeroDay - fitting.fromDay : 0;
+  const fitShiftText = Math.abs(fitShift) < 1 ? "where it started" : `${formatDuration(fitShift)} ${fitShift > 0 ? "later" : "earlier"}`;
+  const dips = fitting ? dipCount(waveFor(numberSet), EVENTS, tiers, zeroDay, { center, span }) : null;
+  const sliderPct = Math.min(94, Math.max(6, ((zeroDay - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN)) * 100));
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -197,13 +228,50 @@ export default function Hud() {
 
       <footer className="wave-bar">
         <div className="wave-group wave-zero">
-          <span className="wave-group-label">zero point</span>
-          <input type="range" min={SLIDER_MIN} max={SLIDER_MAX} step={1} value={Math.round(zeroDay)} onChange={(e) => setZeroDay(Number(e.target.value))} aria-label="Drag the zero point through time" />
+          <span className="wave-group-label" title="The date the wave reaches zero. Drag it to test another end date: the curve slides along history and the events stay put.">
+            end date
+          </span>
+          <div className="wave-slider">
+            <input
+              type="range"
+              min={SLIDER_MIN}
+              max={SLIDER_MAX}
+              step={1}
+              value={Math.round(zeroDay)}
+              onPointerDown={() => {
+                sliderHeld.current = true;
+                beginFit();
+              }}
+              onPointerUp={() => {
+                sliderHeld.current = false;
+                endFitSoon(900);
+              }}
+              onPointerCancel={() => {
+                sliderHeld.current = false;
+                endFitSoon(900);
+              }}
+              onChange={(e) => {
+                beginFit();
+                setZeroDay(Number(e.target.value));
+                endFitSoon(1500);
+              }}
+              aria-label="Drag the end date through time"
+            />
+            {fitting && dips && (
+              <div className="wave-fit-tip" role="status" style={{ left: `${sliderPct}%` }}>
+                <strong>{formatDay(zeroDay, "day")}</strong>
+                <span>{fitShiftText}</span>
+                <span title="Events in view, before the end date, whose wave value is in the lowest third of the wave around them">
+                  {dips.inDip} of {dips.total} events in dips
+                </span>
+              </div>
+            )}
+          </div>
           <div className="wave-presets">
             {ZERO_PRESETS.map((p) => {
               const active = Math.abs(momentToDay(p.zero) - zeroDay) < 1e-6;
               return (
-                <button key={p.id} type="button" className={active ? "on" : ""} title={p.detail} onClick={() => store.getState().setZero(p.zero)}>
+                <button key={p.id} type="button" className={active ? "on" : ""} title={p.detail} onClick={() => jumpZero(p.zero)}>
                   {p.label}
                 </button>
               );
