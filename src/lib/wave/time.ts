@@ -87,3 +87,12 @@ export function formatDaysToZero(days: number): string {
   if (abs < 1000) return `${abs.toFixed(abs < 10 ? 3 : 1)} days ${side}`;
   return `${formatDuration(abs)} ${side}`;
 }
+
+/** A date at another scale of the wave, to a detail that suits how far away it is. */
+export function formatEchoDate(day: number, daysAway: number): string {
+  if (daysAway > DAYS_PER_YEAR * 10000) return `${formatDuration(daysAway)} ago`;
+  if (daysAway > DAYS_PER_YEAR * 200) return formatDay(day, "year");
+  if (daysAway > DAYS_PER_YEAR * 3) return formatDay(day, "month");
+  if (daysAway > 2) return formatDay(day, "day");
+  return formatDayFull(day);
+}

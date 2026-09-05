@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { cycles } from "@/lib/wave/cycles";
 import { hexagramAt } from "@/lib/wave/hexagram";
 
@@ -23,23 +24,39 @@ export function Glyph({ lines, size = 18 }: { lines: string; size?: number }) {
   );
 }
 
-/** The hexagram in effect at a moment on each of the seven cycles, with the cycle nearest the view highlighted. */
+/** The hexagram in effect on the cycle the view sits in, the 384-day one beside it, and all seven on request. */
 export default function Hexagrams({ daysToZero, currentLevel }: { daysToZero: number; currentLevel: number }) {
+  const [expanded, setExpanded] = useState(false);
   const list = cycles().map((c) => hexagramAt(daysToZero, c.level));
   const current = list[currentLevel];
+  const base = list[0];
   return (
     <div className="wave-hexagrams">
-      <div className="wave-hexagram-row">
-        {list.map((h) => (
-          <div key={h.level} className={`wave-hexagram${h.level === currentLevel ? " current" : ""}`} title={`${h.number} ${h.name}, line ${h.line} (${cycles()[h.level].label} cycle)`}>
-            <Glyph lines={h.lines} />
-            <span>{h.number}</span>
-          </div>
-        ))}
-      </div>
-      <div className="wave-hexagram-name">
-        {current.number} {current.name} · line {current.line} · cycle of {cycles()[currentLevel].label}
-      </div>
+      <button type="button" className="wave-hexagram-main" onClick={() => setExpanded(!expanded)} aria-expanded={expanded} title={expanded ? "Hide the other cycles" : "Show the hexagram on every cycle"}>
+        <Glyph lines={current.lines} size={30} />
+        <span className="wave-hexagram-text">
+          <span className="wave-hexagram-title">
+            {current.number} {current.name}
+          </span>
+          <span className="wave-hexagram-sub">line {current.line} · hexagram of this cycle</span>
+        </span>
+        {currentLevel !== 0 && (
+          <span className="wave-hexagram-base" title={`${base.number} ${base.name}, line ${base.line}, on the 384-day cycle`}>
+            <Glyph lines={base.lines} size={16} />
+            <span>{base.number}</span>
+          </span>
+        )}
+      </button>
+      {expanded && (
+        <div className="wave-hexagram-row">
+          {list.map((h) => (
+            <div key={h.level} className={`wave-hexagram${h.level === currentLevel ? " current" : ""}`} title={`${h.number} ${h.name}, line ${h.line} (${cycles()[h.level].label} cycle)`}>
+              <Glyph lines={h.lines} />
+              <span>{h.number}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

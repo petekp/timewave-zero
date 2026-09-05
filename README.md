@@ -33,31 +33,43 @@ mathematics drives both views; a link in each corner switches between them and c
 date, number set and the stretch of time being looked at.
 
 - The wave is a ribbon of terrain. Height is habit, the dips are novelty, and the deepest dips
-  glow. Drag to travel, scroll or pinch to zoom, click the ribbon to mark a date. The view spans
-  anything from an hour to the 72-billion-year cycle; the ladder on the right shows which of the
-  seven cycles the view sits in.
-- The zero point is a beam of light. It defaults to 6 AM on December 21, 2012 but a slider and a
-  date field move it anywhere from 1900 to 2200, and the whole curve re-fits. Past the zero
-  point the theory ends; the ribbon continues as a grey reflection of the years before, and the
-  readout says so.
+  glow. Drag to travel (a flick coasts), scroll or pinch to zoom, click the ribbon to mark a
+  date and see the mark's echoes at other scales. The view spans anything from an hour to the
+  72-billion-year cycle; the ladder on the right shows which of the seven cycles the view sits
+  in, and thin dashed lines mark where each cycle begins.
+- "Descend" glides the view into the zero point at a fixed rate on the log scale, 64 times
+  closer every few seconds. Because the wave repeats at every 64×, the same terrain keeps rising
+  under the camera until an hour is left. Any drag or scroll stops it.
+- The zero point is a beam of light. It defaults to 6 AM on December 21, 2012; a slider moves
+  it anywhere from 1900 to 2200 and the whole curve re-fits. Three presets carry their reasons:
+  McKenna's final date, the Hiroshima-aligned Nov 18, 2012 he started with, and the Sept 28,
+  1995 that Meyer's Caesar/Kennedy pairing implies. Past the zero point the theory ends; the
+  ribbon continues as a grey reflection of the years before, and the readout says so.
 - "Stack ×64" raises two terraces behind the ribbon: the same window 64 and 4,096 times wider.
-  Points that line up vertically are resonances.
-- The readout shows the I Ching hexagram in effect on each cycle. The 384 positions of the
-  hexagrammatic layer are six per hexagram, and the derivation walks the King Wen sequence so a
-  384-day cycle opens at hexagram 1 and closes at hexagram 64 on the zero point.
-- Pins are events: gold for moments McKenna and Meyer cited as novelty or as resonances of one
-  another (from McKenna's "The Time Wave and History", Meyer's documentation and the 1997
-  correlation list in the software guide), cyan for events after McKenna's death chosen in the
-  same spirit, violet for dates the 1997 list projected. Each pin opens a card with the quoted
-  claim, its source, a live Wikipedia summary and, for a few, a Psychedelic Salon recording of
-  McKenna on the timewave from the Internet Archive. "Show echoes" marks where the event recurs
-  at 64, 4,096 and 262,144 times the scale, and each echo jumps the view there.
-- "Sound" starts a quiet drone: lower for wider views, brighter in the dips. Off by default.
-- Keys: arrows travel, `+`/`-` zoom, `N` now, `Z` zero point, `S` stack, `E` events, `?` guide.
-- The URL holds the view (`?c=1999-06-15&s=7&z=2012-12-21T06:00&n=Kelley`), so any view can be shared.
+  Points that line up vertically are resonances. "Compare number sets" draws the other four
+  sets as thin lines over the ribbon, each scaled to its own range, so the Watkins objection
+  can be seen rather than described.
+- The readout shows novelty as a bar relative to the visible window (the exact wave value is in
+  its tooltip) and the I Ching hexagram in effect on the cycle the view sits in, with all seven
+  cycles a click away. The 384 positions of the hexagrammatic layer are six per hexagram, and
+  the derivation walks the King Wen sequence so a 384-day cycle opens at hexagram 1 and closes
+  at hexagram 64 on the zero point.
+- Pins are events: gold for McKenna, Meyer and the theory (moments they cited as novelty or as
+  resonances, from McKenna's "The Time Wave and History", Meyer's documentation, Food of the
+  Gods and the 1997 correlation list in the software guide, plus McKenna's own life), cyan for
+  events added in the same spirit, violet for dates the 1997 list projected (off by default).
+  Crowded pins collapse into a "+N" chip that zooms in. Each pin opens a card with the claim,
+  its source, a live Wikipedia summary, the dates of its echoes on the other cycles (each a
+  jump), and, for a few, a Psychedelic Salon recording of McKenna on the timewave from the
+  Internet Archive.
+- "Sound", in the ⋯ menu, starts a quiet drone: lower for wider views, brighter in the dips.
+- Keys: arrows travel, `+`/`-` zoom, `N` now, `Z` zero point, `S` stack, `E` events, space
+  descends, `?` guide.
+- The URL holds the view (`?c=1999-06-15&s=7&z=2012-12-21T06:00&n=Kelley`), so any view can be
+  shared; "copy link" is in the ⋯ menu.
 
 `src/lib/wave` holds the view's pure code (sampling, ticks, cycles, hexagram mapping, events,
-URL state, sound). `src/components/wave` holds the scene and HUD.
+zero-date presets, URL state, sound). `src/components/wave` holds the scene and HUD.
 
 ## Fidelity
 

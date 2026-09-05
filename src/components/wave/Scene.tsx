@@ -5,11 +5,14 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import Axis from "./Axis";
+import CycleLines from "./CycleLines";
+import Descend from "./Descend";
 import Effects from "./Effects";
 import Events from "./Events";
 import Interaction from "./Interaction";
 import Markers from "./Markers";
 import Ribbon from "./Ribbon";
+import SetGhosts from "./SetGhosts";
 import Sound from "./Sound";
 import Stack from "./Stack";
 import { useWaveStore } from "./store-context";
@@ -69,6 +72,9 @@ export default function Scene() {
       <Rig />
       <Ribbon surfaceRef={surfaceRef} />
       <Stack />
+      <SetGhosts />
+      <CycleLines />
+      <Descend />
       <Markers />
       <Events />
       <Sound />

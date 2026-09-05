@@ -96,3 +96,11 @@ describe("events", () => {
     expect(Math.abs(yearOfEcho - 1171)).toBeLessThan(1);
   });
 });
+
+describe("zero presets", () => {
+  test("the Hiroshima-aligned zero date is one 67-year cycle after the bomb", async () => {
+    const { ZERO_PRESETS } = await import("./presets");
+    const h = ZERO_PRESETS.find((p) => p.id === "hiroshima")!;
+    expect(h.zero).toMatchObject({ year: 2012, month: 11, day: 18, hour: 8, minute: 15 });
+  });
+});

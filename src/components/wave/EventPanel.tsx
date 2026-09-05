@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { EVENTS_BY_ID, SOURCES, TIER_LABEL, eventDay, type WaveEvent } from "@/lib/wave/events";
-import { DAYS_PER_YEAR, formatDay, formatDaysToZero, formatDuration, formatYear } from "@/lib/wave/time";
+import { EVENTS_BY_ID, SOURCES, TIER_LABEL, echoes, eventDay, type WaveEvent } from "@/lib/wave/events";
+import { DAYS_PER_YEAR, formatDay, formatDaysToZero, formatDuration, formatEchoDate, formatYear } from "@/lib/wave/time";
+import { jumpToEcho } from "./Events";
 import { useWave, useWaveStore } from "./store-context";
 import { fetchSummary, type WikiSummary } from "./wikipedia";
 
@@ -97,13 +98,31 @@ function EventCard({ event }: { event: WaveEvent }) {
           </a>
         </div>
       )}
+      {daysToZero > 0 && (
+        <div className="wave-echoes">
+          <div className="wave-echoes-title">the same point on other cycles</div>
+          <ul>
+            {echoes(daysToZero).map((e) => {
+              const factor = Math.pow(64, Math.abs(e.level)).toLocaleString();
+              return (
+                <li key={e.level}>
+                  <button type="button" onClick={() => jumpToEcho(store, e.daysToZero, e.level)} title="Show the wave there, at that scale">
+                    <span className="wave-echo-level">{e.level > 0 ? `×${factor}` : `÷${factor}`}</span>
+                    <span>{formatEchoDate(zeroDay - e.daysToZero, e.daysToZero)}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
       <div className="wave-event-actions">
         <button type="button" onClick={() => store.getState().setGoal(day, spanForEvent(event, store.getState().goalSpan))}>
           go there
         </button>
         {daysToZero > 0 ? (
           <button type="button" className={showEchoes ? "on" : ""} onClick={() => store.getState().setShowEchoes(!showEchoes)} title="Where this moment recurs at 64, 4,096 and 262,144 times the scale">
-            {showEchoes ? "hide echoes" : "show echoes"}
+            {showEchoes ? "hide echo pins" : "show echo pins"}
           </button>
         ) : (
           <span className="wave-event-hint">after the zero point there are no resonances</span>

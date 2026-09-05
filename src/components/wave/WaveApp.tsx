@@ -43,11 +43,11 @@ export default function WaveApp() {
     };
   }, [store]);
 
-  // Keyboard: arrows travel, + and - zoom, N now, Z zero point, S stacks the scales, Esc clears the mark, ? the guide.
+  // Keyboard: arrows travel, + and - zoom, N now, Z zero point, S stacks the scales, E events, space descends, Esc clears, ? the guide.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
-      if (target && (target.tagName === "INPUT" || target.tagName === "SELECT" || target.tagName === "TEXTAREA")) return;
+      if (target && (target.tagName === "INPUT" || target.tagName === "SELECT" || target.tagName === "TEXTAREA" || (e.key === " " && target.tagName === "BUTTON"))) return;
       const s = store.getState();
       const step = s.goalSpan * 0.15;
       switch (e.key) {
@@ -89,6 +89,11 @@ export default function WaveApp() {
         case "e":
         case "E":
           s.setShowEventList(!s.showEventList);
+          break;
+        case " ":
+        case "d":
+        case "D":
+          s.setDescending(!s.descending);
           break;
         case "?":
           s.setShowGuide(!s.showGuide);

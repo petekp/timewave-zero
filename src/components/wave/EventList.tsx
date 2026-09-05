@@ -1,15 +1,18 @@
 "use client";
 
-import { EVENTS, TIER_LABEL, eventDay } from "@/lib/wave/events";
+import { EVENTS, TIER_LABEL, eventDay, type EventTier } from "@/lib/wave/events";
 import { eventDateText, spanForEvent } from "./EventPanel";
 import { useWave, useWaveStore } from "./store-context";
 
 const ORDERED = [...EVENTS].sort((a, b) => eventDay(a) - eventDay(b));
+const TIERS: EventTier[] = ["mckenna", "added", "projected"];
 
 export default function EventList() {
   const store = useWaveStore();
   const open = useWave((s) => s.showEventList);
   const selected = useWave((s) => s.selectedEvent);
+  const tiers = useWave((s) => s.tiers);
+  const eventsVisible = useWave((s) => s.eventsVisible);
   if (!open) return null;
   return (
     <aside className="wave-list" aria-label="Events">
@@ -19,9 +22,21 @@ export default function EventList() {
           ×
         </button>
       </div>
-      <p className="wave-list-intro">Moments McKenna and Meyer pointed to, plus a few from after his death. Colours: gold cited, cyan later, violet projected in 1997.</p>
+      <div className="wave-list-filters">
+        {TIERS.map((t) => (
+          <label key={t} className="wave-check">
+            <input type="checkbox" checked={tiers[t]} onChange={(e) => store.getState().setTier(t, e.target.checked)} />
+            <span className={`wave-dot wave-tier-${t}`} />
+            {TIER_LABEL[t]}
+          </label>
+        ))}
+        <label className="wave-check">
+          <input type="checkbox" checked={eventsVisible} onChange={(e) => store.getState().setEventsVisible(e.target.checked)} />
+          pins on the ribbon
+        </label>
+      </div>
       <ol>
-        {ORDERED.map((e) => (
+        {ORDERED.filter((e) => tiers[e.tier]).map((e) => (
           <li key={e.id} className={e.id === selected ? "selected" : ""}>
             <button
               type="button"

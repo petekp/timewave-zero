@@ -1,18 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DEFAULT_ZERO_MOMENT, fromJdn, toJdn } from "@/lib/timewave/calendar";
 import { NUMBER_SET_INFO, NUMBER_SET_NAMES, type NumberSetName } from "@/lib/timewave/datasets";
 import { cycles, ladderPosition } from "@/lib/wave/cycles";
+import { ZERO_PRESETS } from "@/lib/wave/presets";
 import { valueAt } from "@/lib/wave/sample";
+import { waveSound } from "@/lib/wave/sound";
 import { formatDayFull, formatDaysToZero, formatDuration, momentToDay } from "@/lib/wave/time";
 import { formatMoment, parseMoment } from "@/lib/wave/url";
-import { waveSound } from "@/lib/wave/sound";
 import { waveFor } from "@/lib/wave/waves";
 import EventList from "./EventList";
 import EventPanel from "./EventPanel";
 import Hexagrams from "./Hexagrams";
+import { SET_COLORS } from "./SetGhosts";
+import { normOf, viewMetrics } from "./mapping";
 import { useWave, useWaveStore } from "./store-context";
 
 const SLIDER_MIN = toJdn({ year: 1900, month: 1, day: 1 }, "gregorian");
@@ -30,29 +33,46 @@ export function formatWaveValue(v: number): string {
 const GUIDE = [
   {
     title: "This is the timewave.",
-    body: "The ribbon is McKenna's curve. Height is habit. The dips are novelty, the moments when something new comes into the world. Colour follows the same idea: the deepest dips glow.",
-  },
-  {
-    title: "Drag to travel. Scroll to zoom.",
-    body: "Left is the past, right is the future. Zoom out far enough and the same shape returns at 64 times the scale. The ladder on the right shows which of the seven cycles you are inside.",
+    body: "The ribbon is McKenna’s curve. Height is habit; the dips are novelty, and the deepest glow. Drag to travel, scroll to zoom, click to mark a date. Zoom out far enough and the same shape returns at 64 times the scale.",
   },
   {
     title: "The beam is the zero point.",
-    body: "McKenna set it at December 21, 2012, 6 AM. The wave reaches zero there and the theory stops. Past it the ribbon continues as a ghost: a reflection of the years before.",
+    body: "December 21, 2012, 6 AM. The wave reaches zero there and the theory stops; past it the ribbon is a grey reflection of the years before. The slider moves the zero point and the whole curve re-fits.",
   },
   {
-    title: "Stack the scales.",
-    body: "Stack ×64 raises two terraces behind the ribbon: the same window 64 and 4,096 times wider. Points that line up vertically are resonances, the theory's claim that history rhymes across scales. The readout shows the I Ching hexagram in effect on each cycle.",
-  },
-  {
-    title: "The pins are events.",
-    body: "Gold pins are moments McKenna and Meyer pointed to as novelty or as resonances of one another. Cyan pins came after his death. Open one and press show echoes to see where it recurs at 64 times the scale.",
-  },
-  {
-    title: "Move the zero point.",
-    body: "The slider at the bottom drags the zero point through time and the whole curve re-fits around it. Click the ribbon to mark a date; press Now to come back to the present.",
+    title: "Pins, echoes, descent.",
+    body: "Gold pins are moments McKenna and Meyer pointed to; cyan were added in the same spirit. Open one to read the claim and jump to its echoes at other scales. Stack ×64 lays the scales on terraces. Descend glides you into the zero point, 64 times closer every few seconds.",
   },
 ];
+
+/** Novelty of the readout day relative to the visible window, refreshed every frame because the window's range eases outside React. */
+function NoveltyMeter() {
+  const store = useWaveStore();
+  const fill = useRef<HTMLDivElement>(null);
+  const meter = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let frame = 0;
+    let last = "";
+    const tick = () => {
+      frame = requestAnimationFrame(tick);
+      const { hoverDay, pickDay, center, zeroDay, numberSet } = store.getState();
+      const { value } = valueAt(waveFor(numberSet), zeroDay, hoverDay ?? pickDay ?? center);
+      const novelty = viewMetrics.ready ? 1 - Math.min(1, Math.max(0, normOf(value))) : 0;
+      const width = `${Math.round(novelty * 100)}%`;
+      if (width === last) return;
+      last = width;
+      if (fill.current) fill.current.style.width = width;
+      meter.current?.setAttribute("aria-valuenow", novelty.toFixed(2));
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [store]);
+  return (
+    <div ref={meter} className="wave-novelty" role="meter" aria-valuemin={0} aria-valuemax={1} aria-valuenow={0}>
+      <div ref={fill} style={{ width: "0%" }} />
+    </div>
+  );
+}
 
 export default function Hud() {
   const store = useWaveStore();
@@ -67,18 +87,22 @@ export default function Hud() {
   const showGuide = useWave((s) => s.showGuide);
   const stacked = useWave((s) => s.stacked);
   const showEventList = useWave((s) => s.showEventList);
-  const eventsVisible = useWave((s) => s.eventsVisible);
   const sound = useWave((s) => s.sound);
+  const compareSets = useWave((s) => s.compareSets);
+  const showMarkEchoes = useWave((s) => s.showMarkEchoes);
+  const descending = useWave((s) => s.descending);
+  const interacted = useWave((s) => s.interacted);
   const [copied, setCopied] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   // The zero date field is free text while editing; it re-syncs whenever the store's zero date changes.
   const [zeroEdit, setZeroEdit] = useState<{ zero: typeof zero; text: string } | null>(null);
   const zeroText = zeroEdit && zeroEdit.zero === zero ? zeroEdit.text : formatMoment(zero, false);
-  const setZeroText = (text: string) => setZeroEdit({ zero, text });
   const [guideStep, setGuideStep] = useState(0);
 
   const readoutDay = hoverDay ?? pickDay ?? center;
-  const readoutKind = hoverDay !== null ? "under the pointer" : pickDay !== null ? "marked" : "centre of view";
+  const readoutKind = hoverDay !== null ? "under the pointer" : pickDay !== null ? "marked" : descending ? "descending" : "centre of view";
   const { value, reflected } = valueAt(waveFor(numberSet), zeroDay, readoutDay);
+  const daysToZero = zeroDay - readoutDay;
   const ladder = ladderPosition(span);
   const cycleList = cycles();
   const currentLevel = Math.min(cycleList.length - 1, Math.max(0, Math.round(ladder)));
@@ -93,11 +117,7 @@ export default function Hud() {
     if (m) store.getState().setZero({ ...m, hour: zero.hour, minute: zero.minute });
     setZeroEdit(null);
   };
-  const zoom = (factor: number) => {
-    const s = store.getState();
-    s.setGoal(s.goalCenter, s.goalSpan * factor);
-  };
-  const share = async () => {
+  const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
@@ -105,6 +125,12 @@ export default function Hud() {
     } catch {
       window.prompt("Copy this link", window.location.href);
     }
+  };
+  const toggleSound = () => {
+    // Started here, inside the click, so the browser lets the audio play.
+    if (sound) waveSound.stop();
+    else waveSound.start();
+    store.getState().setSound(!sound);
   };
   const closeGuide = () => {
     store.getState().setShowGuide(false);
@@ -130,18 +156,29 @@ export default function Hud() {
       <section className="wave-readout" aria-live="polite">
         <div className="wave-readout-kind">{readoutKind}</div>
         <div className="wave-readout-date">{formatDayFull(readoutDay)}</div>
-        <dl>
-          <div>
-            <dt>wave value</dt>
-            <dd>{formatWaveValue(value)}</dd>
-          </div>
-          <div>
-            <dt>zero point</dt>
-            <dd>{formatDaysToZero(zeroDay - readoutDay)}</dd>
-          </div>
-        </dl>
+        <div className="wave-novelty-row" title={`wave value ${formatWaveValue(value)} · novelty is relative to the visible window`}>
+          <span>novelty</span>
+          <NoveltyMeter />
+        </div>
+        <button type="button" className="wave-zero-line" onClick={() => store.getState().setGoal(zeroDay, store.getState().goalSpan)} title="Go to the zero point">
+          {formatDaysToZero(daysToZero)} the zero point →
+        </button>
         {reflected && <div className="wave-badge">reflection · the wave is undefined after the zero point</div>}
-        <Hexagrams daysToZero={zeroDay - readoutDay} currentLevel={currentLevel} />
+        {pickDay !== null && (
+          <div className="wave-mark-actions">
+            {zeroDay - pickDay > 0 ? (
+              <button type="button" className={showMarkEchoes ? "on" : ""} onClick={() => store.getState().setShowMarkEchoes(!showMarkEchoes)} title="Where the marked date recurs at other scales">
+                {showMarkEchoes ? "hide echoes" : "echoes of the mark"}
+              </button>
+            ) : (
+              <span className="wave-event-hint">no resonances after the zero point</span>
+            )}
+            <button type="button" onClick={() => store.getState().setPick(null)}>
+              clear mark
+            </button>
+          </div>
+        )}
+        <Hexagrams daysToZero={daysToZero} currentLevel={currentLevel} />
       </section>
 
       <aside className="wave-ladder" aria-label="Cycles of the wave">
@@ -160,94 +197,107 @@ export default function Hud() {
 
       <footer className="wave-bar">
         <div className="wave-group wave-zero">
-          <label>
-            zero point
-            <input
-              type="text"
-              inputMode="numeric"
-              value={zeroText}
-              onChange={(e) => setZeroText(e.target.value)}
-              onBlur={commitZeroText}
-              onKeyDown={(e) => e.key === "Enter" && commitZeroText()}
-              aria-label="Zero date (YYYY-MM-DD)"
-              spellCheck={false}
-            />
-          </label>
-          <input
-            type="range"
-            min={SLIDER_MIN}
-            max={SLIDER_MAX}
-            step={1}
-            value={Math.round(zeroDay)}
-            onChange={(e) => setZeroDay(Number(e.target.value))}
-            aria-label="Drag the zero point through time"
-          />
-          {Math.abs(zeroDay - DEFAULT_ZERO_DAY) > 1e-6 && (
-            <button type="button" onClick={() => store.getState().setZero(DEFAULT_ZERO_MOMENT)}>
-              reset to 2012
-            </button>
-          )}
-        </div>
-        <div className="wave-group">
-          <label>
-            number set
-            <select value={numberSet} onChange={(e) => store.getState().setNumberSet(e.target.value as NumberSetName)} title={NUMBER_SET_INFO[numberSet].description}>
-              {NUMBER_SET_NAMES.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </label>
+          <span className="wave-group-label">zero point</span>
+          <input type="range" min={SLIDER_MIN} max={SLIDER_MAX} step={1} value={Math.round(zeroDay)} onChange={(e) => setZeroDay(Number(e.target.value))} aria-label="Drag the zero point through time" />
+          <div className="wave-presets">
+            {ZERO_PRESETS.map((p) => {
+              const active = Math.abs(momentToDay(p.zero) - zeroDay) < 1e-6;
+              return (
+                <button key={p.id} type="button" className={active ? "on" : ""} title={p.detail} onClick={() => store.getState().setZero(p.zero)}>
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
         <div className="wave-group wave-nav">
-          <button type="button" onClick={() => zoom(2)} title="Zoom out">
-            −
+          <button type="button" className={descending ? "on" : ""} onClick={() => store.getState().setDescending(!descending)} title="Glide into the zero point, 64 times closer every few seconds (space)">
+            {descending ? "■ stop" : "▶ descend"}
           </button>
-          <button type="button" onClick={() => zoom(0.5)} title="Zoom in">
-            +
-          </button>
-          <button type="button" onClick={() => store.getState().setGoal(nowDay, store.getState().goalSpan)}>
+          <button type="button" onClick={() => store.getState().setGoal(nowDay, store.getState().goalSpan)} title="Centre the present (N)">
             now
           </button>
-          <button type="button" onClick={() => store.getState().setGoal(zeroDay, store.getState().goalSpan)}>
-            zero point
-          </button>
-          <button type="button" className={stacked ? "on" : ""} onClick={() => store.getState().setStacked(!stacked)} title="Show the same window at 64 and 4,096 times the scale">
+          <button type="button" className={stacked ? "on" : ""} onClick={() => store.getState().setStacked(!stacked)} title="Show the same window at 64 and 4,096 times the scale (S)">
             {stacked ? "unstack" : "stack ×64"}
           </button>
-          <button type="button" className={showEventList ? "on" : ""} onClick={() => store.getState().setShowEventList(!showEventList)}>
+          <button type="button" className={showEventList ? "on" : ""} onClick={() => store.getState().setShowEventList(!showEventList)} title="List the events (E)">
             events
           </button>
-          <button type="button" className={eventsVisible ? "" : "off"} onClick={() => store.getState().setEventsVisible(!eventsVisible)} title={eventsVisible ? "Hide the pins" : "Show the pins"}>
-            {eventsVisible ? "hide pins" : "show pins"}
-          </button>
-          {pickDay !== null && (
-            <button type="button" onClick={() => store.getState().setPick(null)}>
-              clear mark
+          <div className="wave-more">
+            <button type="button" className={menuOpen ? "on" : ""} onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-label="More">
+              ⋯
             </button>
-          )}
-          <button
-            type="button"
-            className={sound ? "on" : ""}
-            onClick={() => {
-              // Started here, inside the click, so the browser lets the audio play.
-              if (sound) waveSound.stop();
-              else waveSound.start();
-              store.getState().setSound(!sound);
-            }}
-            title="A drone that follows the wave: lower for wider views, brighter in the dips"
-          >
-            {sound ? "sound on" : "sound"}
-          </button>
-          <button type="button" onClick={share}>
-            {copied ? "copied" : "share"}
-          </button>
-          <button type="button" onClick={() => store.getState().setShowGuide(true)} aria-label="Guide">
-            ?
-          </button>
+            {menuOpen && (
+              <>
+                <div className="wave-menu-backdrop" onClick={() => setMenuOpen(false)} />
+                <div className="wave-menu" role="menu">
+                  <label>
+                    number set
+                    <select value={numberSet} onChange={(e) => store.getState().setNumberSet(e.target.value as NumberSetName)} title={NUMBER_SET_INFO[numberSet].description}>
+                      {NUMBER_SET_NAMES.map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="wave-check">
+                    <input type="checkbox" checked={compareSets} onChange={(e) => store.getState().setCompareSets(e.target.checked)} />
+                    compare number sets
+                  </label>
+                  <label className="wave-check">
+                    <input type="checkbox" checked={sound} onChange={toggleSound} />
+                    sound
+                  </label>
+                  <label>
+                    exact zero date
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={zeroText}
+                      onChange={(e) => setZeroEdit({ zero, text: e.target.value })}
+                      onBlur={commitZeroText}
+                      onKeyDown={(e) => e.key === "Enter" && commitZeroText()}
+                      aria-label="Zero date (YYYY-MM-DD)"
+                      spellCheck={false}
+                    />
+                  </label>
+                  {Math.abs(zeroDay - DEFAULT_ZERO_DAY) > 1e-6 && (
+                    <button type="button" onClick={() => store.getState().setZero(DEFAULT_ZERO_MOMENT)}>
+                      reset zero point to 2012
+                    </button>
+                  )}
+                  <button type="button" onClick={copyLink}>
+                    {copied ? "link copied" : "copy link to this view"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      store.getState().setShowGuide(true);
+                    }}
+                  >
+                    guide
+                  </button>
+                  <Link href="/" className="wave-link">
+                    the 1993 original →
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
         </div>
-        <p className="wave-hint">drag to travel · scroll to zoom · click to mark</p>
+        {compareSets && (
+          <div className="wave-group wave-legend" aria-label="Number sets">
+            {NUMBER_SET_NAMES.map((n) => (
+              <span key={n} className={n === numberSet ? "current" : ""}>
+                <i style={{ background: SET_COLORS[n] }} />
+                {n}
+              </span>
+            ))}
+          </div>
+        )}
+        <p className={`wave-hint${interacted ? " gone" : ""}`}>drag to travel · scroll to zoom · click to mark</p>
       </footer>
 
       <EventPanel />

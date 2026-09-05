@@ -1,7 +1,7 @@
 "use client";
 
-import { useThree } from "@react-three/fiber";
-import { useEffect } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useWaveStore } from "./store-context";
 import type { SurfaceRef } from "./Ribbon";
@@ -18,13 +18,28 @@ const WHEEL_ZOOM_RATE = 0.0016;
 export default function Interaction({ surfaceRef }: { surfaceRef: SurfaceRef }) {
   const store = useWaveStore();
   const { camera, gl } = useThree();
+  /** Coasting after a flick: velocity in days per second, zero when at rest. */
+  const inertia = useRef({ velocity: 0, dragging: false });
+
+  useFrame((_, dt) => {
+    const m = inertia.current;
+    if (m.dragging || m.velocity === 0) return;
+    const s = store.getState();
+    m.velocity *= Math.exp(-dt * 3.2);
+    if (Math.abs(m.velocity) < s.span * 0.002) {
+      m.velocity = 0;
+      return;
+    }
+    s.setView(s.center + m.velocity * dt, s.span);
+  });
 
   useEffect(() => {
+    const motion = inertia.current;
     const el = gl.domElement;
     const raycaster = new THREE.Raycaster();
     const ndc = new THREE.Vector2();
     const pointers = new Map<number, { x: number; y: number }>();
-    let drag: { startDay: number; startX: number; startY: number; moved: boolean; pointerId: number } | null = null;
+    let drag: { startDay: number; startX: number; startY: number; moved: boolean; pointerId: number; lastCenter: number; lastTime: number } | null = null;
     let pinch: { span: number; dist: number; midDay: number } | null = null;
 
     const toNdc = (clientX: number, clientY: number) => {
@@ -52,8 +67,15 @@ export default function Interaction({ surfaceRef }: { surfaceRef: SurfaceRef }) 
       return groundXAt(camera, p.x, p.y);
     };
 
+    const interrupt = () => {
+      motion.velocity = 0;
+      const s = store.getState();
+      if (s.descending) s.setDescending(false);
+    };
+
     const onDown = (e: PointerEvent) => {
       if (e.button !== 0 && e.pointerType === "mouse") return;
+      interrupt();
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       el.setPointerCapture(e.pointerId);
       if (pointers.size === 2) {
@@ -66,7 +88,7 @@ export default function Interaction({ surfaceRef }: { surfaceRef: SurfaceRef }) 
       }
       const day = dayAt(e.clientX, e.clientY, false);
       if (day === null) return;
-      drag = { startDay: day, startX: e.clientX, startY: e.clientY, moved: false, pointerId: e.pointerId };
+      drag = { startDay: day, startX: e.clientX, startY: e.clientY, moved: false, pointerId: e.pointerId, lastCenter: store.getState().center, lastTime: performance.now() };
     };
 
     const onMove = (e: PointerEvent) => {
@@ -84,12 +106,24 @@ export default function Interaction({ surfaceRef }: { surfaceRef: SurfaceRef }) 
       if (drag && drag.pointerId === e.pointerId) {
         if (!drag.moved && Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) < DRAG_THRESHOLD_PX) return;
         drag.moved = true;
+        motion.dragging = true;
         el.style.cursor = "grabbing";
         const gx = groundX(e.clientX, e.clientY);
         if (gx === null) return;
-        const { span } = store.getState();
-        store.getState().setView(drag.startDay - gx / unitsPerDay(span), span);
-        store.getState().setHover(null);
+        const s = store.getState();
+        const center = drag.startDay - gx / unitsPerDay(s.span);
+        s.setView(center, s.span);
+        s.setHover(null);
+        s.setInteracted();
+        // Velocity for the coast after release, smoothed over recent moves.
+        const now = performance.now();
+        const seconds = (now - drag.lastTime) / 1000;
+        if (seconds > 0.004) {
+          const v = (center - drag.lastCenter) / seconds;
+          motion.velocity = motion.velocity === 0 ? v : motion.velocity * 0.6 + v * 0.4;
+          drag.lastCenter = center;
+          drag.lastTime = now;
+        }
         return;
       }
       if (e.pointerType === "mouse") store.getState().setHover(dayAt(e.clientX, e.clientY, true));
@@ -104,8 +138,11 @@ export default function Interaction({ surfaceRef }: { surfaceRef: SurfaceRef }) 
           const s = store.getState();
           s.setPick(day !== null && s.pickDay !== null && Math.abs(day - s.pickDay) < s.span * 0.004 ? null : day);
         }
+        // A slow release stops dead; a flick coasts.
+        if (!drag.moved || performance.now() - drag.lastTime > 120) motion.velocity = 0;
         drag = null;
       }
+      motion.dragging = false;
       el.style.cursor = "";
     };
 
@@ -113,6 +150,8 @@ export default function Interaction({ surfaceRef }: { surfaceRef: SurfaceRef }) 
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
+      interrupt();
+      store.getState().setInteracted();
       const scale = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
       const dy = e.deltaY * scale;
       const dx = e.deltaX * scale;

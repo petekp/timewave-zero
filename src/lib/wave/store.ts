@@ -6,6 +6,7 @@
 import { create } from "zustand";
 import { DEFAULT_ZERO_MOMENT, type Moment } from "../timewave/calendar";
 import type { NumberSetName } from "../timewave/datasets";
+import type { EventTier } from "./events";
 import { BASE_CYCLE_DAYS } from "./cycles";
 import { dateToDay, momentToDay } from "./time";
 
@@ -31,7 +32,17 @@ export interface WaveState {
   showEchoes: boolean;
   showEventList: boolean;
   eventsVisible: boolean;
+  /** Which event tiers are drawn and listed. */
+  tiers: Record<EventTier, boolean>;
   sound: boolean;
+  /** Ghost lines of the other number sets. */
+  compareSets: boolean;
+  /** Resonances of the marked date. */
+  showMarkEchoes: boolean;
+  /** Gliding toward the zero point, zooming as it nears. */
+  descending: boolean;
+  /** Set after the first drag or wheel, to retire the hint. */
+  interacted: boolean;
 
   setZero(zero: Moment): void;
   setNumberSet(name: NumberSetName): void;
@@ -49,7 +60,12 @@ export interface WaveState {
   setShowEchoes(on: boolean): void;
   setShowEventList(on: boolean): void;
   setEventsVisible(on: boolean): void;
+  setTier(tier: EventTier, on: boolean): void;
   setSound(on: boolean): void;
+  setCompareSets(on: boolean): void;
+  setShowMarkEchoes(on: boolean): void;
+  setDescending(on: boolean): void;
+  setInteracted(): void;
   /** Refresh the present moment. */
   touchNow(): void;
 }
@@ -93,7 +109,12 @@ export function createWaveStore(initial: InitialView = {}, now: Date = new Date(
     showEchoes: false,
     showEventList: false,
     eventsVisible: true,
+    tiers: { mckenna: true, added: true, projected: false },
     sound: false,
+    compareSets: false,
+    showMarkEchoes: false,
+    descending: false,
+    interacted: false,
 
     setZero: (zero) => set({ zero, zeroDay: momentToDay(zero) }),
     setNumberSet: (numberSet) => set({ numberSet }),
@@ -117,14 +138,21 @@ export function createWaveStore(initial: InitialView = {}, now: Date = new Date(
       set({ center: nextCenter, span: nextSpan });
     },
     setHover: (hoverDay) => set({ hoverDay }),
-    setPick: (pickDay) => set({ pickDay }),
+    setPick: (pickDay) => set(pickDay === null ? { pickDay, showMarkEchoes: false } : { pickDay }),
     setStacked: (stacked) => set({ stacked }),
     setShowGuide: (showGuide) => set({ showGuide }),
     selectEvent: (selectedEvent) => set({ selectedEvent }),
     setShowEchoes: (showEchoes) => set({ showEchoes }),
     setShowEventList: (showEventList) => set({ showEventList }),
     setEventsVisible: (eventsVisible) => set({ eventsVisible }),
+    setTier: (tier, on) => set({ tiers: { ...get().tiers, [tier]: on } }),
     setSound: (sound) => set({ sound }),
+    setCompareSets: (compareSets) => set({ compareSets }),
+    setShowMarkEchoes: (showMarkEchoes) => set({ showMarkEchoes }),
+    setDescending: (descending) => set({ descending }),
+    setInteracted: () => {
+      if (!get().interacted) set({ interacted: true });
+    },
     touchNow: () => set({ nowDay: dateToDay(new Date()) }),
   }));
 }

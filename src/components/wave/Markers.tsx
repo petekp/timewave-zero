@@ -4,9 +4,11 @@ import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import { echoes } from "@/lib/wave/events";
 import { valueAt } from "@/lib/wave/sample";
 import { waveFor } from "@/lib/wave/waves";
-import { useWaveStore } from "./store-context";
+import { Echo, jumpToEcho } from "./Events";
+import { useWave, useWaveStore } from "./store-context";
 import { HEIGHT, RIBBON_HALF_W, VIEW_HALF, dayToX, heightOf, normOf } from "./mapping";
 
 /** A soft radial glow, drawn once. */
@@ -50,8 +52,14 @@ function place(group: THREE.Group | null, day: number | null, center: number, sp
 export default function Markers() {
   const store = useWaveStore();
   const glow = useGlowTexture();
+  const pickDay = useWave((s) => s.pickDay);
+  const showMarkEchoes = useWave((s) => s.showMarkEchoes);
+  const zeroDayNow = useWave((s) => s.zeroDay);
+  const markEchoes = pickDay !== null && showMarkEchoes ? echoes(zeroDayNow - pickDay) : [];
   const zeroRef = useRef<THREE.Group>(null);
+  const zeroLabelRef = useRef<HTMLDivElement>(null);
   const nowRef = useRef<THREE.Group>(null);
+  const nowLabelRef = useRef<HTMLDivElement>(null);
   const hoverRef = useRef<THREE.Group>(null);
   const hoverBar = useRef<THREE.Mesh>(null);
   const pickRef = useRef<THREE.Group>(null);
@@ -68,8 +76,9 @@ export default function Markers() {
 
   useFrame(({ clock }) => {
     const { center, span, zeroDay, nowDay, hoverDay, pickDay, numberSet } = store.getState();
-    place(zeroRef.current, zeroDay, center, span);
-    place(nowRef.current, nowDay, center, span);
+    // drei's Html keeps drawing for hidden groups, so the labels are hidden by hand.
+    if (zeroLabelRef.current) zeroLabelRef.current.style.display = place(zeroRef.current, zeroDay, center, span) === null ? "none" : "";
+    if (nowLabelRef.current) nowLabelRef.current.style.display = place(nowRef.current, nowDay, center, span) === null ? "none" : "";
     if (place(hoverRef.current, hoverDay, center, span) !== null && hoverDay !== null) setBar(hoverBar.current, hoverDay, zeroDay, numberSet);
     if (place(pickRef.current, pickDay, center, span) !== null && pickDay !== null) setBar(pickBar.current, pickDay, zeroDay, numberSet);
     if (beamRef.current) {
@@ -92,7 +101,7 @@ export default function Markers() {
         <sprite position={[0, HEIGHT * 0.6, 0]} scale={[0.9, HEIGHT * 1.6, 1]}>
           <spriteMaterial map={glow} color="#9ff2ff" transparent opacity={0.35} depthWrite={false} blending={THREE.AdditiveBlending} />
         </sprite>
-        <Html position={[0, HEIGHT * 1.3, 0]} center zIndexRange={[5, 0]} className="wave-label wave-label-zero" style={{ pointerEvents: "none" }}>
+        <Html ref={zeroLabelRef} position={[0, HEIGHT * 1.3, 0]} center zIndexRange={[5, 0]} className="wave-label wave-label-zero" style={{ pointerEvents: "none" }}>
           zero point
         </Html>
       </group>
@@ -103,7 +112,7 @@ export default function Markers() {
           <boxGeometry args={[0.012, HEIGHT * 1.2, 0.012]} />
           <meshBasicMaterial color="#ffffff" transparent opacity={0.55} />
         </mesh>
-        <Html position={[0, HEIGHT * 1.28, RIBBON_HALF_W]} center zIndexRange={[5, 0]} className="wave-label wave-label-now" style={{ pointerEvents: "none" }}>
+        <Html ref={nowLabelRef} position={[0, HEIGHT * 1.28, RIBBON_HALF_W]} center zIndexRange={[5, 0]} className="wave-label wave-label-now" style={{ pointerEvents: "none" }}>
           now
         </Html>
       </group>
@@ -119,6 +128,10 @@ export default function Markers() {
           <meshBasicMaterial color="#ffffff" transparent opacity={0.5} />
         </mesh>
       </group>
+
+      {markEchoes.map((e) => (
+        <Echo key={`mark-${e.level}`} daysToZero={e.daysToZero} level={e.level} onJump={() => jumpToEcho(store, e.daysToZero, e.level)} />
+      ))}
 
       {/* A marked date, set by clicking. */}
       <group ref={pickRef} visible={false}>

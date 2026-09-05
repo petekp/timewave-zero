@@ -532,7 +532,7 @@
   color: var(--mark);
 }
 
-.wave-tier-later {
+.wave-tier-added {
   color: var(--accent);
 }
 
@@ -707,7 +707,7 @@
 
 .wave-list li button {
   display: grid;
-  grid-template-columns: 10px 112px 1fr;
+  grid-template-columns: 10px 132px 1fr;
   gap: 8px;
   align-items: baseline;
   width: 100%;
@@ -755,4 +755,298 @@
     width: auto;
     max-height: 46vh;
   }
+
+  .wave-menu {
+    right: auto;
+    left: 0;
+  }
+}
+
+
+/* Readout additions. */
+.wave-novelty-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 8px;
+}
+
+.wave-novelty-row span {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.wave-novelty {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(141, 147, 184, 0.2);
+  overflow: hidden;
+}
+
+.wave-novelty div {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #4b2a8a, var(--novel));
+  transition: width 120ms linear;
+}
+
+.wave-hud .wave-zero-line {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  padding: 0;
+  background: none;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.wave-hud .wave-zero-line:hover {
+  color: var(--accent);
+}
+
+.wave-mark-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.wave-mark-actions button {
+  font-size: 12px;
+}
+
+/* Compact hexagram block. */
+.wave-hud .wave-hexagram-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: var(--fg);
+}
+
+.wave-hud .wave-hexagram-main:hover {
+  color: var(--fg);
+}
+
+.wave-hexagram-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.wave-hexagram-title {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.wave-hexagram-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.wave-hexagram-base {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+}
+
+.wave-hexagram-row {
+  margin-top: 10px;
+}
+
+/* Bottom bar additions. */
+.wave-group-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.wave-presets {
+  display: flex;
+  gap: 4px;
+}
+
+.wave-hud .wave-presets button {
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+.wave-more {
+  position: relative;
+}
+
+.wave-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: auto;
+}
+
+.wave-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  z-index: 2;
+  display: grid;
+  gap: 10px;
+  min-width: 260px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(10, 9, 22, 0.94);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.wave-menu label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.wave-menu input[type="text"] {
+  width: 130px;
+}
+
+.wave-check {
+  cursor: pointer;
+}
+
+.wave-check input {
+  accent-color: var(--accent);
+  margin: 0;
+}
+
+.wave-menu .wave-check {
+  justify-content: flex-start;
+}
+
+.wave-menu .wave-link {
+  font-size: 12px;
+  text-align: center;
+}
+
+.wave-legend {
+  gap: 12px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.wave-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.wave-legend span.current {
+  color: var(--fg);
+}
+
+.wave-legend i {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.wave-hint {
+  transition: opacity 600ms ease;
+}
+
+.wave-hint.gone {
+  opacity: 0;
+}
+
+/* Event card echo list. */
+.wave-echoes {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.wave-echoes-title {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.wave-echoes ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.wave-hud .wave-echoes button {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  font-size: 12px;
+  color: #d8d5e6;
+}
+
+.wave-hud .wave-echoes button:hover {
+  color: var(--accent);
+}
+
+.wave-echo-level {
+  min-width: 68px;
+  color: #c98bff;
+}
+
+/* Event list filters. */
+.wave-list-filters {
+  display: grid;
+  gap: 6px;
+  margin: 6px 16px 10px;
+  font-size: 12px;
+}
+
+.wave-list-filters .wave-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d8d5e6;
+}
+
+/* Scene labels. */
+.wave-label-cycle {
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0.04em;
+  font-size: 10px;
+}
+
+.wave-event-label.cluster button {
+  border-radius: 10px;
+  color: var(--muted);
+  border-color: rgba(141, 147, 184, 0.5);
 }
