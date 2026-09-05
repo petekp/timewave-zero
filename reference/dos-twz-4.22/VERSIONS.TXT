@@ -1,0 +1,72 @@
+
+                            Version History
+
+An Apple //e version of Timewave Zero was written by Peter Meyer
+during 1986-1987 and was published in 1987 by Lux Natura.
+
+This MS-DOS version of Timewave Zero was written by the same author in
+1989 and was published by Lux Natura in that year.
+
+In Version 3.27 a couple of minor bugs were fixed and an eleventh
+screen was added.
+
+Version 3.28 fixed a keyboard problem involving an incompatibility
+with the ROM BIOS in older PC XT's.
+
+In 1991 the software was revised and published by Dolphin Software.
+as Version 4.00.  A few minor display bugs were fixed.  When printing
+resonance points it became possible to suppress the printing of yao
+resonance points and print only the major and trigrammatic resonance
+points.  When graphing resonance points it became possible to graph,
+in addition to the major resonance points, the trigrammatic resonance
+points.
+
+Version 4.02 allowed use of a math coprocessor; two versions of the
+main program were introduced, TWZERO87.EXE for use with computers with
+a math coprocessor and TWZERO.EXE for use with those without.
+
+Version 4.04 corrected a problem with the extended AT keyboard.
+Previous versions of the software responded only to one of the two
+sets of Home, End and arrow keys.
+
+Version 4.05 corrected three bugs:  (1) The addition of a large number
+of days to a target date previously had produced an incorrect result.
+(2) Repeated redisplay of the graph in zoom mode previously sometimes
+ate pixels on the horizontal axis.  (3) Recession to the limit of the
+timespan (a little over 7,000,000,000 years) previously sometimes
+produced an endlessly repeated display of the final graph.
+
+Version 4.08 corrected a bug in the addition of days to the zero date.
+
+Version 4.09 allowed selection of the Quit option by pressing the
+Escape key.
+
+Version 4.10 incorporated the construction in the eleven screens of a
+set of eleven trigrammatic resonance points from the target date of
+the current screen.
+
+Version 4.11 fixed a small bug which appeared when printing wave values
+after calculating a major resonance.
+
+Version 4.12 allowed writing the wave values to a file on disk as well
+as to the printer.
+
+Version 4.20 allowed modification of the wave factor during program
+execution, and also allows each screen to have its own wave factor.
+This version also allowed specification of a "confirmation" flag in
+the TWZ.CFG file.  Screen sets saved with versions prior to 4.20
+cannot be read by Version 4.20 or later and vice versa.
+
+Version 4.21 allowed specification of the target date as the zero date
+by entering "0" at the month prompt.  The startup batch files were
+changed.  The TW_EN.EXE program was modified.
+
+Version 4.22 corrected a bug in the display of x-axis labels when the
+display of a higher major resonance resulted in the right end of the
+x-axis corresponding to a point in time after the zero point.
+
+Version 4.22 is the final version of the MS-DOS Timewave Zero published
+by Dolphin Software.  Four years and three months after work on this
+software first began it was completed on April 19, 1993, the 50th
+anniversary of the first LSD trip (by Albert Hofmann).
+

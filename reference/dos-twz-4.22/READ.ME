@@ -1,0 +1,49 @@
+To start the Timewave Zero software one of four batch files should be
+run, depending on your system configuration.  Type the name of the
+appropriate batch file at the DOS prompt as follows:
+
+If you have no graphics adaptor installed (i.e. if you have a monochrome
+monitor with no graphics card) then type TWZMONO.
+If you have a CGA, EGA or VGA adaptor installed then:
+(i)   If you have an 80x87 math coprocessor installed then type TWZ87.
+(ii)  If you have no 80x87 math coprocessor installed then type TWZ.
+(iii) If you have a laser printer connected then type TWZLP.
+
+If you are using an IBM PS/2 computer and this does not work then type
+"GRAPHICS" at the DOS prompt and then "TWZERO" or (with a math
+coprocessor) "TWZERO87".
+
+If your system has a graphics card installed and a math coprocessor
+then you can also start the software directly by typing TWZERO87 at
+the DOS prompt.  If your system has a graphics card installed and no
+math coprocessor then you can also start the software by typing TWZERO.
+
+When the program starts it will display the title screen.  Press a key
+and the main screen will be displayed, with "Screen no. 11". This should
+display the current date and time, read from the system clock.  Press
+"F" to graph the timewave for the 7-day period centered on the current date.
+
+The program provides eleven screens, so that you can have eleven
+different graphs available.  You move among the screens using the PgUp
+and PgDn screens or the function keys (F1 - F11).  When the screens are
+saved or loaded as a set only the first ten screens are saved or loaded.
+
+The manner of dumping the Timewave Zero graph to the printer may be
+changed (if necessary) by modifying the GRAPHICS installation command
+in TWZ.BAT.  If you are using DOS 5.0 then the graph may be dumped to
+a wider variety of printers (including the Hewlett-Packard Laserjet
+printers).  Consult your DOS manual concerning the GRAPHICS command.
+
+The value of SEEKFACTOR in the TWZ.CFG file is 3, meaning that in an
+automatic seek for a maximum or a minumum the software expands or
+contracts the timespan by a factor of 3.  The value of this factor
+affects how long it takes to find the maximum or minumum.  A value of
+3 is suitable for 80286 and 80386 machines. If you are running the
+software on an 8086 machine then you may prefer to set SEEKFACTOR=4 in
+the TWZ.CFG file.  On an 80486 machine SEEKFACTOR=2 might be preferable.
+
+Please consult Chapter 2 of the manual for full details of operation.
+
+The DFR.EXE program is a separate utilty that can be used to browse
+textfiles, e.g. DFR *.DOC.
+

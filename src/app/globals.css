@@ -1,0 +1,145 @@
+@font-face {
+  font-family: "Web437 IBM EGA 8x8";
+  src: url("/fonts/Web437_IBM_EGA_8x8.woff") format("woff");
+  font-display: block;
+}
+
+:root {
+  color-scheme: dark;
+  --fg: #aaa;
+  --bg: #000;
+  --panel: #111;
+  --accent: #55ffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Web437 IBM EGA 8x8", "Courier New", monospace;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  gap: 16px;
+}
+
+.twz {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 1280px;
+}
+
+.monitor {
+  position: relative;
+  width: 100%;
+  max-width: min(1280px, calc((100vh - 48px) * 1.6));
+  aspect-ratio: 640 / 400;
+  background: #000;
+  border: 2px solid #333;
+}
+
+.screen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  cursor: default;
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--fg);
+}
+
+.panel {
+  width: 100%;
+  display: grid;
+  gap: 16px;
+}
+
+.panel h2 {
+  font-size: 16px;
+  font-weight: normal;
+  color: var(--accent);
+  margin: 0 0 8px;
+}
+
+.panel p {
+  margin: 0 0 8px;
+}
+
+kbd {
+  font-family: inherit;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 0 4px;
+}
+
+select,
+button {
+  font: inherit;
+  background: var(--panel);
+  color: #fff;
+  border: 1px solid #555;
+  padding: 2px 6px;
+}
+
+.printer details {
+  border: 1px solid #333;
+  margin-bottom: 8px;
+}
+
+.printer summary {
+  cursor: pointer;
+  padding: 4px 8px;
+  background: var(--panel);
+}
+
+.printer pre {
+  margin: 0;
+  padding: 8px;
+  overflow-x: auto;
+  white-space: pre;
+  font-size: 14px;
+}
+
+.dump {
+  display: block;
+  width: 640px;
+  max-width: 100%;
+  image-rendering: pixelated;
+  padding: 8px;
+}
+
+footer {
+  border-top: 1px solid #333;
+  padding-top: 8px;
+  font-size: 14px;
+  color: #888;
+}
+
+footer a {
+  color: var(--accent);
+}
+
+.status {
+  color: #555;
+}

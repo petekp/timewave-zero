@@ -1,0 +1,374 @@
+{
+ "1900RUN.SCR": [
+  {
+   "target": 15285.0,
+   "span": 25566.975000000002,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 487552.0,
+   "span": 93502.08,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 7618.0,
+   "span": 1460.97,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 9866285.0,
+   "span": 12582604.125,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 154161.0,
+   "span": 196602.775625,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 12582604.125,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 6291302.0625,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 3145651.03125,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 1572825.515625,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 786412.7578125,
+   "targetPx": 368,
+   "waveFactor": 64
+  }
+ ],
+ "1990RUN.SCR": [
+  {
+   "target": 15285.0,
+   "span": 25566.975000000002,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 487552.0,
+   "span": 93502.08,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 7618.0,
+   "span": 1460.97,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 9866285.0,
+   "span": 12582604.125,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 154161.0,
+   "span": 196602.775625,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 12582604.125,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 6291302.0625,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 3145651.03125,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 1572825.515625,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 786412.7578125,
+   "targetPx": 368,
+   "waveFactor": 64
+  }
+ ],
+ "1995RUN.SCR": [
+  {
+   "target": 15285.0,
+   "span": 25566.975000000002,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 487552.0,
+   "span": 93502.08,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 7618.0,
+   "span": 1460.97,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 9866285.0,
+   "span": 12582604.125,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 154161.0,
+   "span": 196602.775625,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 12582604.125,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 6291302.0625,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 3145651.03125,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 1572825.515625,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 786412.7578125,
+   "targetPx": 368,
+   "waveFactor": 64
+  }
+ ],
+ "1996TRI.SCR": [
+  {
+   "target": 6144.0,
+   "span": 2191.455,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 55296.0,
+   "span": 2191.455,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 129025.0,
+   "span": 2191.455,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 153600.0,
+   "span": 2191.455,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 178176.0,
+   "span": 2191.455,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 202752.0,
+   "span": 2191.455,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 251904.0,
+   "span": 2191.455,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 276480.0,
+   "span": 2191.455,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 325632.0,
+   "span": 2191.455,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 350208.0,
+   "span": 2191.455,
+   "targetPx": 184,
+   "waveFactor": 64
+  }
+ ],
+ "CHAP1.SCR": [
+  {
+   "target": 15285.0,
+   "span": 25566.975000000002,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 487552.0,
+   "span": 93502.08,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 7618.0,
+   "span": 1460.97,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 9866285.0,
+   "span": 12582604.125,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 154161.0,
+   "span": 196602.775625,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 12582604.125,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 6291302.0625,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 3145651.03125,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 1572825.515625,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 786412.7578125,
+   "targetPx": 368,
+   "waveFactor": 64
+  }
+ ],
+ "LASTRUN.SCR": [
+  {
+   "target": 15285.0,
+   "span": 25566.975000000002,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 487552.0,
+   "span": 93502.08,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 7618.0,
+   "span": 1460.97,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 9866285.0,
+   "span": 12582604.125,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 154161.0,
+   "span": 196602.775625,
+   "targetPx": 184,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 12582604.125,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 6291302.0625,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 3145651.03125,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 1572825.515625,
+   "targetPx": 368,
+   "waveFactor": 64
+  },
+  {
+   "target": 0.0,
+   "span": 786412.7578125,
+   "targetPx": 368,
+   "waveFactor": 64
+  }
+ ]
+}

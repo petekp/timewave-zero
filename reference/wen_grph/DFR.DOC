@@ -1,0 +1,29 @@
+
+DFR.EXE is a fully functional textfile reader.  Entering DFR
+without command line parameters gives a reminder of usage, namely:
+
+ The Dolphin File Reader, version 3.2, Copyright 1991 Dolphin Software
+ Use "DFR filepath" to read file(s).  Filepath may contain wildcards.
+ Add /b to the command line for BIOS video output.
+
+You may browse multiple files by using wildcards in the file specifi-
+cation, e.g. DFR *.TXT. If more than one readable textfile is found
+then the program will initially display a scrollable list of files at
+the bottom right corner of the screen.  Press Enter or Escape to browse
+the currently-displayed file, otherwise scroll through the list and
+press Enter at the file you wish to read.  If this happens to be a
+non-readable file then the next readable file will be displayed instead.
+
+F1 displays a help screen.  Control-L brings up the list of files (if there
+is more than one readable file).  Control-S allows you to search the
+current file for a character string.  If a match is found then pressing
+Control-S again will find the next match (if any).  Searches are not
+case-sensitive.  Control-D takes you temporarily to DOS; enter "EXIT" to
+return to the program.
+
+The Dolphin File Reader supports 25-, 43- and 50-row modes, and uses
+whichever mode is in effect when the program starts.  Files of up to about
+350K in size are handled. If you want the program to use BIOS video output,
+rather than writing directly to video RAM (which is quicker), use the /b
+option.
+
