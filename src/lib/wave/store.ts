@@ -1,0 +1,132 @@
+/**
+ * State of the modern view. `center` and `span` are what is drawn now; the
+ * scene eases them toward `goalCenter` and `goalSpan` every frame, so wheel
+ * zooms and jumps glide instead of snapping.
+ */
+import { create } from "zustand";
+import { DEFAULT_ZERO_MOMENT, type Moment } from "../timewave/calendar";
+import type { NumberSetName } from "../timewave/datasets";
+import { BASE_CYCLE_DAYS } from "./cycles";
+import { dateToDay, momentToDay } from "./time";
+
+export const MIN_SPAN = 1 / 24;
+export const MAX_SPAN = BASE_CYCLE_DAYS * Math.pow(64, 6) * 1.5;
+
+export interface WaveState {
+  zero: Moment;
+  zeroDay: number;
+  numberSet: NumberSetName;
+  nowDay: number;
+  center: number;
+  span: number;
+  goalCenter: number;
+  goalSpan: number;
+  hoverDay: number | null;
+  pickDay: number | null;
+  stacked: boolean;
+  showGuide: boolean;
+  /** Id of the selected event, or null. */
+  selectedEvent: string | null;
+  /** Show the selected event's resonances at other scales. */
+  showEchoes: boolean;
+  showEventList: boolean;
+  eventsVisible: boolean;
+  sound: boolean;
+
+  setZero(zero: Moment): void;
+  setNumberSet(name: NumberSetName): void;
+  /** Move the view at once, with no easing (dragging). */
+  setView(center: number, span: number): void;
+  /** Ease the view toward a new centre and span. */
+  setGoal(center: number, span: number): void;
+  /** Advance the drawn view toward the goal; `rate` in 0..1 is the fraction closed this frame. */
+  ease(rate: number): void;
+  setHover(day: number | null): void;
+  setPick(day: number | null): void;
+  setStacked(on: boolean): void;
+  setShowGuide(on: boolean): void;
+  selectEvent(id: string | null): void;
+  setShowEchoes(on: boolean): void;
+  setShowEventList(on: boolean): void;
+  setEventsVisible(on: boolean): void;
+  setSound(on: boolean): void;
+  /** Refresh the present moment. */
+  touchNow(): void;
+}
+
+export function clampSpan(span: number): number {
+  return Math.min(MAX_SPAN, Math.max(MIN_SPAN, span));
+}
+
+function clampCenter(center: number, zeroDay: number): number {
+  return Math.min(zeroDay + MAX_SPAN, Math.max(zeroDay - MAX_SPAN, center));
+}
+
+export interface InitialView {
+  center?: number;
+  span?: number;
+  zero?: Moment;
+  numberSet?: NumberSetName;
+}
+
+export function createWaveStore(initial: InitialView = {}, now: Date = new Date()) {
+  const zero = initial.zero ?? DEFAULT_ZERO_MOMENT;
+  const zeroDay = momentToDay(zero);
+  const nowDay = dateToDay(now);
+  // Default view: a year around today.
+  const span = clampSpan(initial.span ?? 365);
+  const center = clampCenter(initial.center ?? nowDay, zeroDay);
+  return create<WaveState>((set, get) => ({
+    zero,
+    zeroDay,
+    numberSet: initial.numberSet ?? "DATA.TWZ",
+    nowDay,
+    center,
+    span,
+    goalCenter: center,
+    goalSpan: span,
+    hoverDay: null,
+    pickDay: null,
+    stacked: false,
+    showGuide: false,
+    selectedEvent: null,
+    showEchoes: false,
+    showEventList: false,
+    eventsVisible: true,
+    sound: false,
+
+    setZero: (zero) => set({ zero, zeroDay: momentToDay(zero) }),
+    setNumberSet: (numberSet) => set({ numberSet }),
+    setView: (c, s) => {
+      const span = clampSpan(s);
+      const center = clampCenter(c, get().zeroDay);
+      set({ center, span, goalCenter: center, goalSpan: span });
+    },
+    setGoal: (c, s) => set({ goalSpan: clampSpan(s), goalCenter: clampCenter(c, get().zeroDay) }),
+    ease: (rate) => {
+      const { center, span, goalCenter, goalSpan } = get();
+      if (center === goalCenter && span === goalSpan) return;
+      const logSpan = Math.log(span) + (Math.log(goalSpan) - Math.log(span)) * rate;
+      let nextSpan = Math.exp(logSpan);
+      let nextCenter = center + (goalCenter - center) * rate;
+      // Snap once the remaining motion is below what a pixel could show.
+      if (Math.abs(Math.log(goalSpan / nextSpan)) < 1e-4 && Math.abs(goalCenter - nextCenter) < goalSpan * 1e-5) {
+        nextSpan = goalSpan;
+        nextCenter = goalCenter;
+      }
+      set({ center: nextCenter, span: nextSpan });
+    },
+    setHover: (hoverDay) => set({ hoverDay }),
+    setPick: (pickDay) => set({ pickDay }),
+    setStacked: (stacked) => set({ stacked }),
+    setShowGuide: (showGuide) => set({ showGuide }),
+    selectEvent: (selectedEvent) => set({ selectedEvent }),
+    setShowEchoes: (showEchoes) => set({ showEchoes }),
+    setShowEventList: (showEventList) => set({ showEventList }),
+    setEventsVisible: (eventsVisible) => set({ eventsVisible }),
+    setSound: (sound) => set({ sound }),
+    touchNow: () => set({ nowDay: dateToDay(new Date()) }),
+  }));
+}
+
+export type WaveStore = ReturnType<typeof createWaveStore>;

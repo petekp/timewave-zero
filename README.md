@@ -3,7 +3,7 @@
 A faithful web recreation of **Timewave Zero 4.22 for MS-DOS** (Peter Meyer, 1989-1993,
 Lux Natura / Dolphin Software): the program that graphed Terence McKenna's timewave.
 
-**Run it:** https://timewave-zero-seven.vercel.app
+**Run it:** https://timewave-zero-seven.vercel.app · **Reimagined view:** https://timewave-zero-seven.vercel.app/wave
 
 The wave is computed from Meyer's published algorithm and the King Wen sequence. All of the
 number sets are derived at run time from the hexagram sequences and checked against Meyer's
@@ -26,6 +26,39 @@ including its rounding quirks, and the program is driven entirely from the keybo
 - "Printer" output appears under the screen; files download.
 - Quit drops to a small DOS prompt. Type `TWZ` to run the program again.
 
+## The reimagined view (`/wave`)
+
+A second way in, built with three.js (React Three Fiber, drei, postprocessing). The same
+mathematics drives both views; a link in each corner switches between them and carries the zero
+date, number set and the stretch of time being looked at.
+
+- The wave is a ribbon of terrain. Height is habit, the dips are novelty, and the deepest dips
+  glow. Drag to travel, scroll or pinch to zoom, click the ribbon to mark a date. The view spans
+  anything from an hour to the 72-billion-year cycle; the ladder on the right shows which of the
+  seven cycles the view sits in.
+- The zero point is a beam of light. It defaults to 6 AM on December 21, 2012 but a slider and a
+  date field move it anywhere from 1900 to 2200, and the whole curve re-fits. Past the zero
+  point the theory ends; the ribbon continues as a grey reflection of the years before, and the
+  readout says so.
+- "Stack ×64" raises two terraces behind the ribbon: the same window 64 and 4,096 times wider.
+  Points that line up vertically are resonances.
+- The readout shows the I Ching hexagram in effect on each cycle. The 384 positions of the
+  hexagrammatic layer are six per hexagram, and the derivation walks the King Wen sequence so a
+  384-day cycle opens at hexagram 1 and closes at hexagram 64 on the zero point.
+- Pins are events: gold for moments McKenna and Meyer cited as novelty or as resonances of one
+  another (from McKenna's "The Time Wave and History", Meyer's documentation and the 1997
+  correlation list in the software guide), cyan for events after McKenna's death chosen in the
+  same spirit, violet for dates the 1997 list projected. Each pin opens a card with the quoted
+  claim, its source, a live Wikipedia summary and, for a few, a Psychedelic Salon recording of
+  McKenna on the timewave from the Internet Archive. "Show echoes" marks where the event recurs
+  at 64, 4,096 and 262,144 times the scale, and each echo jumps the view there.
+- "Sound" starts a quiet drone: lower for wider views, brighter in the dips. Off by default.
+- Keys: arrows travel, `+`/`-` zoom, `N` now, `Z` zero point, `S` stack, `E` events, `?` guide.
+- The URL holds the view (`?c=1999-06-15&s=7&z=2012-12-21T06:00&n=Kelley`), so any view can be shared.
+
+`src/lib/wave` holds the view's pure code (sampling, ticks, cycles, hexagram mapping, events,
+URL state, sound). `src/components/wave` holds the scene and HUD.
+
 ## Fidelity
 
 Behaviour was captured from the original running in DOSBox and compared cell by cell:
@@ -41,7 +74,7 @@ derived Kelley, Watkins, Sheliak and Huang Ti sets are also available.
 ```
 pnpm install
 pnpm dev        # http://localhost:3000
-pnpm test       # vitest: derivation, wave, calendar, formatting, state machine
+pnpm test       # vitest: derivation, wave, calendar, formatting, state machine, modern view
 pnpm typecheck
 pnpm lint
 pnpm build
@@ -64,4 +97,10 @@ pnpm build
 
 - Peter Meyer's Timewave Zero 4.22 package and C sources (`reference/`, see `SOURCES.md`).
 - Font: Web437 IBM EGA 8x8 from the Ultimate Oldschool PC Font Pack by VileR,
-  CC BY-SA 4.0 (`public/fonts/LICENSE-oldschool-pc-fonts.txt`).
+  CC BY-SA 4.0 (`public/fonts/LICENSE-oldschool-pc-fonts.txt`). The reimagined view uses
+  IBM Plex Sans and IBM Plex Mono (OFL) via `next/font`.
+- Event notes quote McKenna's "The Time Wave and History", Peter Meyer's Timewave Zero
+  documentation and the August 1997 correlation list, all reproduced in Geoffrey Ashbrook's 2001
+  software guide (`reference/papers/twz-software-guide-2001.txt`). Event summaries and images
+  are fetched from Wikipedia (CC BY-SA) at view time. Recordings are Lorenzo Hagerty's
+  Psychedelic Salon episodes on the Internet Archive (CC BY-NC-SA), embedded from archive.org.

@@ -276,3 +276,15 @@ footer a {
     display: inline;
   }
 }
+
+.modern-link {
+  align-self: flex-end;
+  color: var(--accent);
+  border: 1px solid #333;
+  padding: 4px 10px;
+  text-decoration: none;
+}
+
+.modern-link:hover {
+  border-color: var(--accent);
+}

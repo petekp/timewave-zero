@@ -6,8 +6,12 @@ import { LocalStorageStore } from "@/lib/twz/browser-store";
 import { guideFor, type Guide } from "@/lib/twz/guide";
 import { loadGlyphs } from "@/lib/twz/glyphs";
 import { Machine, type KeyInput, type Printout } from "@/lib/twz/machine";
+import { convertCalendar } from "@/lib/timewave/calendar";
 import { SCREEN_H, SCREEN_W, render, toRgba, type GlyphSource } from "@/lib/twz/renderer";
 import { NUMBER_SET_NAMES, type NumberSetName } from "@/lib/timewave/datasets";
+import { leftEdge } from "@/lib/twz/screen";
+import { encodeWaveState } from "@/lib/wave/url";
+import { momentToDay } from "@/lib/wave/time";
 
 const WEEK_1999 = ["c", "6", "Enter", "2", "0", "Enter", "1", "9", "9", "9", "Enter", "n", "e", "0", "Enter", "0", "Enter", "7", "Enter", "f"];
 
@@ -57,6 +61,7 @@ export default function Twz() {
   const [keyboardOverride, setKeyboardOverride] = useState<boolean | null>(null);
   const keyboard = keyboardOverride ?? coarsePointer;
   const [status, setStatus] = useState("");
+  const [waveHref, setWaveHref] = useState("/wave");
   const [guide, setGuide] = useState<Guide | null>(null);
   const [canDemo, setCanDemo] = useState(false);
   const [demo, setDemo] = useState<string | null>(null);
@@ -99,11 +104,13 @@ export default function Twz() {
           for (const d of fresh) saveTextFile(d.name, d.text);
         }
         setStatus(`Mode: ${m.mode}. Screen ${m.current + 1}.`);
+        setWaveHref(modernViewHref(m));
         setGuide(guideFor(m));
         setCanDemo(m.mode === "menu" || m.mode === "title");
       };
       machineRef.current = m;
       setReady(true);
+      setWaveHref(modernViewHref(m));
       setGuide(guideFor(m));
       setCanDemo(true);
       paint();
@@ -195,6 +202,9 @@ export default function Twz() {
 
   return (
     <div className="twz">
+      <a className="modern-link" href={waveHref}>
+        Open the reimagined view →
+      </a>
       <div className="monitor">
         <canvas ref={canvasRef} width={SCREEN_W} height={SCREEN_H} className="screen" onClick={onCanvasClick} aria-label="Timewave Zero screen" />
         {!ready && <div className="loading">Loading font ...</div>}
@@ -311,6 +321,16 @@ export default function Twz() {
       </div>
     </div>
   );
+}
+
+/** Link to the modern view showing the same zero date, number set and, when graphed, the same stretch of time. */
+function modernViewHref(m: Machine): string {
+  const zero = m.calendar === "gregorian" ? m.zero : { ...convertCalendar(m.zero, "julian", "gregorian"), hour: m.zero.hour, minute: m.zero.minute };
+  const zeroDay = momentToDay(zero);
+  const s = m.screen;
+  if (!s || !m.slot.graphed) return `/wave?${encodeWaveState({ center: zeroDay, span: 365.2425 * 20, zero, numberSet: m.numberSet })}`;
+  const center = zeroDay - (leftEdge(s) - s.span / 2);
+  return `/wave?${encodeWaveState({ center, span: s.span, zero, numberSet: m.numberSet })}`;
 }
 
 // The on-screen keyboard shows by default where the pointer is a finger.
