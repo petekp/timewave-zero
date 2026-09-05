@@ -28,6 +28,15 @@ const DEMOS: { title: string; blurb: string; keys: string[] }[] = [
 ];
 const DEMO_KEY_MS = 170;
 
+const LINKS: [string, string][] = [
+  ["Terence McKenna (Wikipedia)", "https://en.wikipedia.org/wiki/Terence_McKenna"],
+  ["Novelty theory and Timewave Zero (Wikipedia)", "https://en.wikipedia.org/wiki/Terence_McKenna#Novelty_theory_and_Timewave_Zero"],
+  ["King Wen sequence of the I Ching (Wikipedia)", "https://en.wikipedia.org/wiki/King_Wen_sequence"],
+  ["2012 phenomenon (Wikipedia)", "https://en.wikipedia.org/wiki/2012_phenomenon"],
+  ["The original program, runnable in the browser (Internet Archive)", "https://archive.org/details/twz_20200405"],
+  ["Peter Meyer's Fractal Time site (archived copy)", "https://web.archive.org/web/2024/https://www.fractal-timewave.com/"],
+];
+
 const HANDLED_KEYS = new Set(["Enter", "Escape", "Backspace", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown", " ", "Tab"]);
 const ZOOM_STEP_MS = 700;
 
@@ -215,6 +224,16 @@ export default function Twz() {
             <p>
               Everything here works as it did on a 1993 PC: press the letter of a menu item, answer the prompts on the bottom line, and read the results in the table.
             </p>
+            <p>Further reading:</p>
+            <ul className="links">
+              {LINKS.map(([text, href]) => (
+                <li key={href}>
+                  <a href={href} target="_blank" rel="noopener noreferrer">
+                    {text}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </details>
         </section>
       )}
@@ -277,7 +296,15 @@ export default function Twz() {
           </p>
           <p>
             Font: Web437 IBM EGA 8x8 from the Ultimate Oldschool PC Font Pack by VileR, CC BY-SA 4.0.{" "}
-            <a href="https://github.com/petekp/timewave-zero">Source on GitHub</a>.
+            <a href="https://github.com/petekp/timewave-zero">Source on GitHub</a>. Background:{" "}
+            <a href="https://en.wikipedia.org/wiki/Terence_McKenna" target="_blank" rel="noopener noreferrer">
+              Terence McKenna
+            </a>{" "}
+            and{" "}
+            <a href="https://en.wikipedia.org/wiki/Terence_McKenna#Novelty_theory_and_Timewave_Zero" target="_blank" rel="noopener noreferrer">
+              Timewave Zero
+            </a>{" "}
+            on Wikipedia.
           </p>
           {status && <p className="status">{status}</p>}
         </footer>

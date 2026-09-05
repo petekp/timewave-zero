@@ -51,6 +51,15 @@ pnpm build
 `src/lib/twz` holds the program model (screens, labels, prompts, printouts, renderer).
 `src/components/Twz.tsx` is the client component that draws the screen on a canvas.
 
+## Further reading
+
+- [Terence McKenna](https://en.wikipedia.org/wiki/Terence_McKenna) and his
+  [novelty theory and Timewave Zero](https://en.wikipedia.org/wiki/Terence_McKenna#Novelty_theory_and_Timewave_Zero) on Wikipedia.
+- The [King Wen sequence](https://en.wikipedia.org/wiki/King_Wen_sequence) the wave is built from, and the
+  [2012 phenomenon](https://en.wikipedia.org/wiki/2012_phenomenon) it fed into.
+- The [original program running in the browser](https://archive.org/details/twz_20200405) at the Internet Archive.
+- Peter Meyer's Fractal Time site ([archived copy](https://web.archive.org/web/2024/https://www.fractal-timewave.com/)).
+
 ## Sources and credits
 
 - Peter Meyer's Timewave Zero 4.22 package and C sources (`reference/`, see `SOURCES.md`).

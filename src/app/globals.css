@@ -185,6 +185,15 @@ footer a {
   color: var(--fg);
 }
 
+.links {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+
+.links a {
+  color: var(--accent);
+}
+
 /* On-screen keyboard: keycaps in the screen's own palette. */
 .kbd {
   width: 100%;
