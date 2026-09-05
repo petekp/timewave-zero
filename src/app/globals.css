@@ -143,3 +143,127 @@ footer a {
 .status {
   color: #555;
 }
+
+/* Guide: what to do next, in the screen's palette. */
+.guide {
+  width: 100%;
+  max-width: min(1280px, calc((100vh - 48px) * 1.6));
+  border: 3px double var(--fg);
+  padding: 8px 12px;
+}
+
+.guide h2 {
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: normal;
+  margin: 0 0 6px;
+}
+
+.guide p {
+  margin: 0 0 6px;
+}
+
+.demos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.demos button:disabled {
+  color: #555;
+  border-color: #333;
+  cursor: default;
+}
+
+.guide details {
+  color: #888;
+}
+
+.guide summary {
+  cursor: pointer;
+  color: var(--fg);
+}
+
+/* On-screen keyboard: keycaps in the screen's own palette. */
+.kbd {
+  width: 100%;
+  max-width: 800px;
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 2px solid #333;
+  background: #000;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.kbd-row {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.kbd-key {
+  min-height: 44px;
+  padding: 0;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--fg);
+  background: #000;
+  border: 2px solid var(--fg);
+  border-bottom-width: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.kbd-key:active,
+.kbd-key.armed {
+  color: #000;
+  background: var(--fg);
+  border-bottom-width: 2px;
+  border-top-width: 4px;
+}
+
+.kbd-key.mod {
+  border-style: dashed;
+}
+
+.kbd-key.small {
+  font-size: 12px;
+}
+
+.kbd-key .short {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  .kbd {
+    padding: 2px;
+    gap: 2px;
+  }
+  .kbd-row {
+    gap: 2px;
+  }
+  .kbd-key,
+  .kbd-key.small {
+    font-size: 8px;
+    min-height: 40px;
+    border-width: 1px;
+    border-bottom-width: 3px;
+  }
+  .kbd-key:active,
+  .kbd-key.armed {
+    border-top-width: 3px;
+    border-bottom-width: 1px;
+  }
+  .kbd-key .long {
+    display: none;
+  }
+  .kbd-key .short {
+    display: inline;
+  }
+}

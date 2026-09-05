@@ -1,11 +1,32 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Keyboard from "@/components/Keyboard";
 import { LocalStorageStore } from "@/lib/twz/browser-store";
+import { guideFor, type Guide } from "@/lib/twz/guide";
 import { loadGlyphs } from "@/lib/twz/glyphs";
 import { Machine, type KeyInput, type Printout } from "@/lib/twz/machine";
 import { SCREEN_H, SCREEN_W, render, toRgba, type GlyphSource } from "@/lib/twz/renderer";
 import { NUMBER_SET_NAMES, type NumberSetName } from "@/lib/timewave/datasets";
+
+const WEEK_1999 = ["c", "6", "Enter", "2", "0", "Enter", "1", "9", "9", "9", "Enter", "n", "e", "0", "Enter", "0", "Enter", "7", "Enter", "f"];
+
+/** Key sequences typed for the user, so the workflow of the original can be watched. */
+const DEMOS: { title: string; blurb: string; keys: string[] }[] = [
+  { title: "Graph a week in June 1999", blurb: "C sets the target date, E a timespan of 0 years, 0 months and 7 days, and F draws the wave.", keys: WEEK_1999 },
+  {
+    title: "Zoom in on the zero date",
+    blurb: "Puts the zero date at the right edge with a one-year timespan, then zooms in by a factor of 3 at every step. Press Esc to stop.",
+    keys: ["c", "0", "Enter", "n", "End", "e", "1", "Enter", "0", "Enter", "0", "Enter", "f", "ArrowUp", "y", "n", "3", "Enter"],
+  },
+  {
+    title: "Jump to a major resonance",
+    blurb: "After the week in June 1999, I finds the same shape 64 times larger: 448 days in the twelfth century.",
+    keys: [...WEEK_1999, "i", "n", "h", "m", "1", "Enter"],
+  },
+  { title: "Load a shipped screen set", blurb: "N loads the 1996TRI set that came with the program; F1 then shows its first screen.", keys: ["n", "Enter", "1", "9", "9", "6", "t", "r", "i", "Enter", "F1"] },
+];
+const DEMO_KEY_MS = 170;
 
 const HANDLED_KEYS = new Set(["Enter", "Escape", "Backspace", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown", " ", "Tab"]);
 const ZOOM_STEP_MS = 700;
@@ -23,7 +44,14 @@ export default function Twz() {
   const [ready, setReady] = useState(false);
   const [prints, setPrints] = useState<PrintItem[]>([]);
   const [numberSet, setNumberSet] = useState<NumberSetName>("DATA.TWZ");
+  const coarsePointer = useSyncExternalStore(subscribeCoarsePointer, getCoarsePointer, () => false);
+  const [keyboardOverride, setKeyboardOverride] = useState<boolean | null>(null);
+  const keyboard = keyboardOverride ?? coarsePointer;
   const [status, setStatus] = useState("");
+  const [guide, setGuide] = useState<Guide | null>(null);
+  const [canDemo, setCanDemo] = useState(false);
+  const [demo, setDemo] = useState<string | null>(null);
+  const demoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const paint = useCallback(() => {
     const m = machineRef.current;
@@ -62,9 +90,13 @@ export default function Twz() {
           for (const d of fresh) saveTextFile(d.name, d.text);
         }
         setStatus(`Mode: ${m.mode}. Screen ${m.current + 1}.`);
+        setGuide(guideFor(m));
+        setCanDemo(m.mode === "menu" || m.mode === "title");
       };
       machineRef.current = m;
       setReady(true);
+      setGuide(guideFor(m));
+      setCanDemo(true);
       paint();
     })();
     return () => {
@@ -76,7 +108,7 @@ export default function Twz() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const m = machineRef.current;
-      if (!m) return;
+      if (!m || demoRef.current) return;
       if (e.metaKey && !e.ctrlKey) return;
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "SELECT" || target.tagName === "TEXTAREA" || target.tagName === "BUTTON" || target.tagName === "SUMMARY")) return;
@@ -110,6 +142,23 @@ export default function Twz() {
     };
   }, [ready, paint]);
 
+  const runDemo = (d: (typeof DEMOS)[number]) => {
+    const m = machineRef.current;
+    if (!m || demoRef.current || !(m.mode === "menu" || m.mode === "title")) return;
+    const keys = m.mode === "title" ? [" ", ...d.keys] : [...d.keys];
+    setDemo(d.title);
+    demoRef.current = setInterval(() => {
+      const key = keys.shift();
+      if (key === undefined || m.mode === "dos") {
+        if (demoRef.current) clearInterval(demoRef.current);
+        demoRef.current = null;
+        setDemo(null);
+        return;
+      }
+      m.key({ key });
+    }, DEMO_KEY_MS);
+  };
+
   const onCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const m = machineRef.current;
     const canvas = canvasRef.current;
@@ -141,6 +190,34 @@ export default function Twz() {
         <canvas ref={canvasRef} width={SCREEN_W} height={SCREEN_H} className="screen" onClick={onCanvasClick} aria-label="Timewave Zero screen" />
         {!ready && <div className="loading">Loading font ...</div>}
       </div>
+      {keyboard && <Keyboard onKey={(key) => !demoRef.current && machineRef.current?.key(key)} />}
+      {guide && (
+        <section className="guide" aria-live="polite">
+          <h2>{demo ? `Demo: ${demo} (typing for you)` : guide.heading}</h2>
+          {guide.lines.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+          <div className="demos">
+            {DEMOS.map((d) => (
+              <button key={d.title} type="button" disabled={!canDemo || !!demo} onClick={() => runDemo(d)} title={d.blurb}>
+                {d.title}
+              </button>
+            ))}
+          </div>
+          <details>
+            <summary>What am I looking at?</summary>
+            <p>
+              Timewave Zero draws McKenna&apos;s &quot;timewave&quot;: a fractal curve built from the King Wen sequence of I Ching hexagrams, which he read as the ebb and flow
+              of novelty in time. Low points are novel, high points habitual, and the whole curve descends to zero on the zero date, 12/21/2012. Because the wave is a
+              fractal, every stretch of it repeats at 64 times the scale: the &quot;resonances&quot;. The program lets you pick a target date, choose how wide a timespan to
+              look at, graph it, move about, zoom, and jump between resonances.
+            </p>
+            <p>
+              Everything here works as it did on a 1993 PC: press the letter of a menu item, answer the prompts on the bottom line, and read the results in the table.
+            </p>
+          </details>
+        </section>
+      )}
       <div className="panel">
         <section className="help">
           <h2>Keys</h2>
@@ -151,7 +228,13 @@ export default function Twz() {
             <kbd>F1</kbd> to <kbd>F11</kbd>, or <kbd>PgUp</kbd>/<kbd>PgDn</kbd>, change screens. On a Mac hold <kbd>fn</kbd> for those keys, or click the screen number.
           </p>
           <p>
-            <kbd>Home</kbd>, <kbd>End</kbd>, <kbd>←</kbd>, <kbd>→</kbd> move the target date (hold <kbd>Ctrl</kbd> or <kbd>Alt</kbd> for eight pixels). After a graph, <kbd>+</kbd> and <kbd>-</kbd> move it too, and <kbd>↑</kbd>/<kbd>↓</kbd> start a zoom.
+            <kbd>Home</kbd>, <kbd>End</kbd>, <kbd>←</kbd>, <kbd>→</kbd> move the target date (hold <kbd>Ctrl</kbd>, or <kbd>Alt</kbd>/<kbd>Option</kbd> on a Mac, for eight pixels). After a graph, <kbd>+</kbd> and <kbd>-</kbd> move it too, and <kbd>↑</kbd>/<kbd>↓</kbd> start a zoom.
+          </p>
+          <p>
+            <button type="button" onClick={() => setKeyboardOverride(!keyboard)}>
+              {keyboard ? "Hide" : "Show"} on-screen keyboard
+            </button>{" "}
+            Its <kbd>Ctrl</kbd> arms the next arrow key; <kbd>Fn</kbd> turns the number row into F1 to F11.
           </p>
           <p>
             Screen sets save to this browser; the sets shipped with the program (LASTRUN, 1900RUN, 1990RUN, 1995RUN, 1996TRI, CHAP1) can be loaded by name. Printed output appears below; files download.
@@ -201,6 +284,19 @@ export default function Twz() {
       </div>
     </div>
   );
+}
+
+// The on-screen keyboard shows by default where the pointer is a finger.
+const COARSE = "(pointer: coarse)";
+
+function subscribeCoarsePointer(onChange: () => void): () => void {
+  const mq = window.matchMedia(COARSE);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+function getCoarsePointer(): boolean {
+  return window.matchMedia(COARSE).matches;
 }
 
 function saveTextFile(name: string, text: string): void {

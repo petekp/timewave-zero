@@ -16,8 +16,11 @@ including its rounding quirks, and the program is driven entirely from the keybo
   Escape selects Quit.
 - F1 to F11, PgUp and PgDn change screens. On a Mac hold `fn` for those keys, or click the
   "Screen no." text.
-- Home, End and the left and right arrows move the target date. Hold Ctrl or Alt for eight-pixel
-  steps. After a graph, `+` and `-` move it too, and the up and down arrows start a zoom.
+- Home, End and the left and right arrows move the target date. Hold Ctrl (or Alt/Option on a
+  Mac) for eight-pixel steps. After a graph, `+` and `-` move it too, and the up and down arrows
+  start a zoom.
+- An on-screen keyboard in the same style appears on touch devices and can be toggled anywhere.
+  Its Ctrl key arms the next arrow; Fn turns the number row into F1 to F11.
 - Screen sets save to the browser. The sets shipped with the program (LASTRUN, 1900RUN,
   1990RUN, 1995RUN, 1996TRI, CHAP1) load by name.
 - "Printer" output appears under the screen; files download.
