@@ -3,6 +3,8 @@
 A faithful web recreation of **Timewave Zero 4.22 for MS-DOS** (Peter Meyer, 1989-1993,
 Lux Natura / Dolphin Software): the program that graphed Terence McKenna's timewave.
 
+**Run it:** https://timewave-zero-seven.vercel.app
+
 The wave is computed from Meyer's published algorithm and the King Wen sequence. All of the
 number sets are derived at run time from the hexagram sequences and checked against Meyer's
 own data files. The screen is a 640x200 CGA bitmap drawn pixel for pixel like the original,
